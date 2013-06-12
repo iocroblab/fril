@@ -1,0 +1,36 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: pthread - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo".\release/version.res" /i "." /d "NDEBUG" /d "PTW32_RC_MSC" "D:\Home\Firmen\Manz\SourceCode\MiRPA\Windows\pthread\version.rc"" 
+Creating temporary file "C:\DOKUME~1\tkr\LOKALE~1\Temp\RSP151.tmp" with contents
+[
+/nologo /MT /W3 /GX /O2 /I "." /D "__CLEANUP_C" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PTW32_BUILD" /D "_MBCS" /Fp".\./pthread.pch" /YX /Fo".\./" /GF /c 
+"D:\Home\Firmen\Manz\SourceCode\MiRPA\Windows\pthread\pthread.c"
+]
+Creating command line "cl.exe @C:\DOKUME~1\tkr\LOKALE~1\Temp\RSP151.tmp" 
+Creating temporary file "C:\DOKUME~1\tkr\LOKALE~1\Temp\RSP152.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib /nologo /subsystem:windows /dll /incremental:no /pdb:".\release/pthreadVC.pdb" /machine:IX86 /out:".\release\pthreadVC.dll" /implib:".\release/pthreadVC.lib" /pdbtype:sept 
+.\pthread.obj
+.\release\version.res
+]
+Creating command line "link.exe @C:\DOKUME~1\tkr\LOKALE~1\Temp\RSP152.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+pthread.c
+Linking...
+   Creating library .\release/pthreadVC.lib and object .\release/pthreadVC.exp
+
+
+
+<h3>Results</h3>
+pthreadVC.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
