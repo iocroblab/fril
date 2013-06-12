@@ -62,7 +62,6 @@
 #include <errno.h>
 #include <friComm.h>
 
-
 //  ---------------------- Doxygen info ----------------------
 //! \class DataLogging
 //!
