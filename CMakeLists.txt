@@ -94,6 +94,9 @@ set(FRIL_SRC
               src/FastResearchInterfaceLibrary/StopRobot.cpp
               src/FastResearchInterfaceLibrary/TimerThreadMain.cpp
               src/FastResearchInterfaceLibrary/WaitForTicks.cpp
+              
+              src/LinuxAbstraction/LinuxAbstraction.cpp
+           
 )
 set(FRIL_TEST_SRC
         src/FastResearchInterfaceTest
