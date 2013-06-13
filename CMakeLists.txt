@@ -157,9 +157,9 @@ set_target_properties( fril_dynamic PROPERTIES
   ########################
   OPTION(ENABLE_TESTS "Compilation of test and example programs" ON)
   if(ENABLE_TESTS)
-    add_library(fril_irml_dynamic SHARED ${FRIL_TYPEIRML_SRC})
+    add_library(fril_irml_dynamic STATIC ${FRIL_TYPEIRML_SRC})
     
-    add_library(fril_test_dynamic SHARED ${FRIL_TEST_SRC})
+    add_library(fril_test_dynamic STATIC ${FRIL_TEST_SRC})
     add_executable(fastResearchInterfaceTest src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp)
     target_link_libraries(fastResearchInterfaceTest fril_test_dynamic fril_dynamic fril_irml_dynamic)
     
