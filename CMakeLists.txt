@@ -110,8 +110,8 @@ if(WIN32)
       src/WindowsAbstraction/WindowsAbstraction.cpp)
 endif()
 if(UNIX)
-  add_definitions(-D__LINUX__)
-  set(FRIL_TEST_SRC ${FRIL_SRC}
+  add_definitions(-D__LINUX__ -DHAVE_SOCKLEN_T)
+  set(FRIL_SRC ${FRIL_SRC}
       src/LinuxAbstraction/LinuxAbstraction.cpp)
 endif()
 # src/MACOSAbstraction/MACOSAbstraction.cpp
@@ -119,6 +119,7 @@ endif()
 
 
 add_library(fril_static STATIC ${FRIL_SRC} )
+target_link_libraries(fril_static ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(fril_static 
   PROPERTIES DEFINE_SYMBOL "FRIL_DLL_EXPORT"
   OUTPUT_NAME fril
@@ -133,6 +134,7 @@ set_target_properties(fril_static
 
 # Create dynamic library (.so) with all basic FRIL functions
 add_library(fril_dynamic SHARED ${FRIL_SRC})
+target_link_libraries(fril_dynamic ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties( fril_dynamic PROPERTIES
   DEFINE_SYMBOL "FRIL_DLL_EXPORT"
   SOVERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}.${FRIL_VERSION_PATCH}"
