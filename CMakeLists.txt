@@ -35,12 +35,6 @@ find_package(Threads REQUIRED)
 ########################
 # Defining the sources
 ########################
-#add_definitions(-DHAVE_SOCKLEN_T)
-
-
-########################
-# Defining the sources
-########################
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -97,7 +91,7 @@ set(FRIL_SRC
 )
 set(FRIL_TEST_SRC
         src/FastResearchInterfaceTest
-        src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp
+#        src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp
         src/FastResearchInterfaceTest/MoveToCandle.cpp
         src/FastResearchInterfaceTest/RunTrajectorySimple.cpp)
 set(FRIL_STARTED_EXAMPLES
@@ -156,6 +150,32 @@ set_target_properties( fril_dynamic PROPERTIES
      LINK_FLAGS "-Wl,-zdefs")
    target_link_libraries(fril_dynamic rt ${CMAKE_THREAD_LIBS_INIT})
   endif ()
+
+  
+  ########################
+  # Test and examples
+  ########################
+  OPTION(ENABLE_TESTS "Compilation of test and example programs" ON)
+  if(ENABLE_TESTS)
+    add_library(fril_irml_dynamic SHARED ${FRIL_TYPEIRML_SRC})
+    
+    add_library(fril_test_dynamic SHARED ${FRIL_TEST_SRC})
+    add_executable(fastResearchInterfaceTest src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp)
+    target_link_libraries(fastResearchInterfaceTest fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    
+    add_executable(LWRCartImpedanceControlExample src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
+    target_link_libraries(LWRCartImpedanceControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    
+    add_executable(LWRJointImpedanceControlExample src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
+    target_link_libraries(LWRJointImpedanceControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    
+    add_executable(LWRJointPositionControlExample src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
+    target_link_libraries(LWRJointPositionControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    
+    add_executable(LWRLoggingExample src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
+    target_link_libraries(LWRLoggingExample fril_test_dynamic fril_dynamic fril_irml_dynamic)    
+  endif(ENABLE_TESTS)
+  
 # 
 # if(ENABLE_TESTS)
 # #ebox eepromtool red_test simple_test slaveinfo firm_update
