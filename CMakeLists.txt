@@ -35,7 +35,7 @@ find_package(Threads REQUIRED)
 ########################
 # Defining the sources
 ########################
-add_definitions(-DHAVE_SOCKLEN_T)
+#add_definitions(-DHAVE_SOCKLEN_T)
 
 
 ########################
@@ -94,9 +94,6 @@ set(FRIL_SRC
               src/FastResearchInterfaceLibrary/StopRobot.cpp
               src/FastResearchInterfaceLibrary/TimerThreadMain.cpp
               src/FastResearchInterfaceLibrary/WaitForTicks.cpp
-              
-              src/LinuxAbstraction/LinuxAbstraction.cpp
-           
 )
 set(FRIL_TEST_SRC
         src/FastResearchInterfaceTest
