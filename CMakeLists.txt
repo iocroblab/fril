@@ -35,6 +35,12 @@ find_package(Threads REQUIRED)
 ########################
 # Defining the sources
 ########################
+add_definitions(-DHAVE_SOCKLEN_T)
+
+
+########################
+# Defining the sources
+########################
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -128,7 +134,7 @@ set_target_properties(fril_static
   VERSION "${FRIL_VERSION}"
   CLEAN_DIRECT_OUTPUT 1)
   if(UNIX AND NOT APPLE)
-    target_link_libraries(fril_static rt)
+    target_link_libraries(fril_static rt ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
 # Create dynamic library (.so) with all basic FRIL functions
@@ -146,7 +152,7 @@ set_target_properties( fril_dynamic PROPERTIES
   IF (UNIX AND NOT APPLE)
    SET_TARGET_PROPERTIES( fril_dynamic PROPERTIES
      LINK_FLAGS "-Wl,-zdefs")
-   target_link_libraries(fril_dynamic rt)
+   target_link_libraries(fril_dynamic rt ${CMAKE_THREAD_LIBS_INIT})
   endif ()
 # 
 # if(ENABLE_TESTS)
