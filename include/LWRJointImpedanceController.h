@@ -175,10 +175,34 @@ public:
 //! \details
 //! \copydetails FastResearchInterface::SetCommandedJointDamping()
 //  ----------------------------------------------------------
+
 	inline void SetCommandedJointDamping(const float *CommandedJointDamping)
 	{
 		return(this->FRI->SetCommandedJointDamping(CommandedJointDamping));
 	}
+
+
+
+        inline void GetCurrentJacobianMatrix(float **JacobianMatrix)
+        {
+                return(this->FRI->GetCurrentJacobianMatrix(JacobianMatrix));
+        }
+                                        
+        inline void GetCurrentMassMatrix(float **MassMatrix)
+        {
+                return(this->FRI->GetCurrentMassMatrix(MassMatrix));
+        }
+                                                                                
+        inline void GetCurrentGravityVector(float *GravityVector)
+        {
+                return(this->FRI->GetCurrentGravityVector(GravityVector));
+        }
+
+        inline void GetMeasuredCartPose(float *MeasuredCartPose)
+        {
+                return(this->FRI->GetMeasuredCartPose(MeasuredCartPose));
+        }
+                                        
 
 
 };	// class LWRJointImpedanceController

@@ -58,6 +58,7 @@
 #include <pthread.h>
 #include <friComm.h>
 
+//#include <iostream> // TEST
 
 // ****************************************************************
 // GetMeasuredJointPositions()
@@ -70,6 +71,8 @@ void FastResearchInterface::GetMeasuredJointPositions(float *MeasuredJointPositi
 	for (i = 0; i < LBR_MNJ; i++)
 	{
 		MeasuredJointPositions[i]	=	this->ReadData.data.msrJntPos[i];
+		//std::cout << "msr udp:  "; for (unsigned int i=0; i<7; i++) std::cout << MeasuredJointPositions[i] << "  "; std::cout << std::endl; // TEST
+		
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 

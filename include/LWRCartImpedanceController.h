@@ -209,6 +209,27 @@ public:
 	{
 		return(this->FRI->GetEstimatedExternalCartForcesAndTorques(EstimatedExternalCartForcesAndTorques));
 	}
+	
+
+
+      inline void GetCurrentJacobianMatrix(float **JacobianMatrix)	
+      {
+               return(this->FRI->GetCurrentJacobianMatrix(JacobianMatrix));
+      }
+                                        
+      inline void GetCurrentMassMatrix(float **MassMatrix)
+      {
+               return(this->FRI->GetCurrentMassMatrix(MassMatrix));   
+      }
+      
+      inline void GetCurrentGravityVector(float *GravityVector)
+      {
+               this->printf("Inside Gravity.\n");
+      
+               return(this->FRI->GetCurrentGravityVector(GravityVector));
+      }
+
+	
 
 };	// class LWRCartImpedanceController
 

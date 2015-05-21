@@ -132,6 +132,9 @@ set_target_properties(fril_static
     target_link_libraries(fril_static rt ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
+# Defaul install
+    install(TARGETS fril_static DESTINATION lib)
+
 # Create dynamic library (.so) with all basic FRIL functions
 add_library(fril_dynamic SHARED ${FRIL_SRC})
 target_link_libraries(fril_dynamic ${CMAKE_THREAD_LIBS_INIT})
@@ -151,6 +154,8 @@ set_target_properties( fril_dynamic PROPERTIES
    target_link_libraries(fril_dynamic rt ${CMAKE_THREAD_LIBS_INIT})
   endif ()
 
+ # Defaul install
+    install(TARGETS fril_dynamic DESTINATION lib)
   
   ########################
   # Test and examples
@@ -175,7 +180,14 @@ set_target_properties( fril_dynamic PROPERTIES
     add_executable(LWRLoggingExample src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
     target_link_libraries(LWRLoggingExample fril_test_dynamic fril_dynamic fril_irml_dynamic)    
   endif(ENABLE_TESTS)
-  
+
+ ########################
+  # Install
+  ########################
+
+
+    # Headers install
+    install(FILES ${FRIL_HDRS}  DESTINATION include/fril)
 # 
 # if(ENABLE_TESTS)
 # #ebox eepromtool red_test simple_test slaveinfo firm_update

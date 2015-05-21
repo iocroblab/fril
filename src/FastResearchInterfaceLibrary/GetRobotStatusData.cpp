@@ -58,6 +58,8 @@
 #include <pthread.h>
 #include <friComm.h>
 
+#include <stdio.h>
+
 
 // ****************************************************************
 // GetFRIMode()
@@ -316,6 +318,7 @@ void FastResearchInterface::GetCurrentGravityVector(float *GravityVector)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
+	
 	for (i = 0; i < LBR_MNJ; i++)
 	{
 		GravityVector[i]	=	this->ReadData.data.gravity[i];

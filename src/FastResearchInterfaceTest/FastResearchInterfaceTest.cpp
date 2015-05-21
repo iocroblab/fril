@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 #ifdef __LINUX__
 	fprintf(stdout, "You may need superuser permission to run this program.\n");
 	fflush(stdout);
-	FRI = new FastResearchInterface("/home/torsten/etc/980039-FRI-Driver.init");
+	FRI = new FastResearchInterface("../etc/980039-FRI-Driver.init");
 #endif
 
 #ifdef __MACOS__

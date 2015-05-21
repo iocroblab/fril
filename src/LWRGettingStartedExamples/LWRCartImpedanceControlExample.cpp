@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
 	LWRCartImpedanceController	*Robot;
 
-	Robot	=	new LWRCartImpedanceController("/home/lwrcontrol/etc/980039-FRI-Driver.init");
+	Robot	=	new LWRCartImpedanceController("../etc/980039-FRI-Driver.init");
 
 	fprintf(stdout, "RobotCartImpedanceController object created. Starting the robot...\n");
 
