@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -59,12 +52,12 @@
 #include <sched.h>
 #include <string.h>
 #include <stdio.h>
-#include <friudp.h>
-#include <friComm.h>
+#include <UDPSocket.h>
+#include <FRICommunication.h>
 #include <OSAbstraction.h>
 
 
-#ifdef WIN32// \ToDo Make this clean through the OSAbstraction
+#if defined(WIN32) || defined(WIN64) || defined(_WIN64)// \ToDo Make this clean through the OSAbstraction
 #include <Windows.h>	
 #endif
 
@@ -78,81 +71,87 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 	int								SequenceCounter					=	0
 								,	ResultValue						=	0;
 
-	float							ZeroVector[LBR_MNJ];
+	float							ZeroVector[NUMBER_OF_JOINTS];
 
-	friUdp 							KRC;
+	UDPSocket 						KRC;
 
-	tFriMsrData 					LocalReadData;
+	FRIDataReceivedFromKRC 			LocalReadData;
 
-	tFriCmdData						LocalCommandData;
+	FRIDataSendToKRC				LocalCommandData;
 
-	FastResearchInterface			*ThisObjectPtr					=	(FastResearchInterface*)ObjectPointer;
+	FastResearchInterface			*ThisObject						=	(FastResearchInterface*)ObjectPointer;
 
-	memset(ZeroVector, 0x0, LBR_MNJ * sizeof(float));
+	memset(ZeroVector, 0x0, NUMBER_OF_JOINTS * sizeof(float));
 	
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN64) || defined(_WIN64)
 	// \ToDo Make this clean through the OSAbstraction
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 #endif	
 
-	pthread_mutex_lock(&(ThisObjectPtr->MutexForThreadCreation));
-	ThisObjectPtr->ThreadCreated	=	true;
-	pthread_mutex_unlock(&(ThisObjectPtr->MutexForThreadCreation));
+	pthread_mutex_lock(&(ThisObject->MutexForThreadCreation));
+	ThisObject->ThreadCreated	=	true;
+	pthread_mutex_unlock(&(ThisObject->MutexForThreadCreation));
 
-	pthread_cond_signal(&(ThisObjectPtr->CondVarForThreadCreation));
+	pthread_cond_signal(&(ThisObject->CondVarForThreadCreation));
 
 	for(;;)
 	{
 		// receive data from the KRC unit
-		ResultValue	=	KRC.Recv(&LocalReadData);
+		ResultValue	=	KRC.ReceiveFRIDataFromKRC(&LocalReadData);
 
 		if (ResultValue != 0)
 		{
-			ThisObjectPtr->OutputConsole->printf("FastResearchInterface::KRCCommunicationThreadMain(): ERROR during the reception of a UDP data package.\n");
+			ThisObject->OutputConsole->printf("FastResearchInterface::KRCCommunicationThreadMain(): ERROR during the reception of a UDP data package.\n");
 		}
 
-		pthread_mutex_lock(&(ThisObjectPtr->MutexForControlData));
-
-		ThisObjectPtr->NewDataFromKRCReceived	=	true;
-		ThisObjectPtr->ReadData				=	LocalReadData;
-
-		if (ThisObjectPtr->TerminateKRCCommunicationThread)
+		if (ThisObject->CurrentControlScheme == FastResearchInterface::JOINT_TORQUE_CONTROL)
 		{
-			pthread_mutex_unlock(&(ThisObjectPtr->MutexForControlData));
+			ThisObject->SetCommandedJointDamping(ZeroVector);
+			ThisObject->SetCommandedJointStiffness(ZeroVector);
+		}
+
+		pthread_mutex_lock(&(ThisObject->MutexForControlData));
+
+		ThisObject->NewDataFromKRCReceived	=	true;
+		ThisObject->ReadData				=	LocalReadData;
+
+		if (!(ThisObject->KRCCommunicationThreadIsRunning))
+		{
+			pthread_mutex_unlock(&(ThisObject->MutexForControlData));
 			break;
 		}
 
-		LocalCommandData	=	ThisObjectPtr->CommandData;
+		LocalCommandData	=	ThisObject->CommandData;
 
 		SequenceCounter++;
-		LocalCommandData.head.sendSeqCount	=	SequenceCounter;
-		LocalCommandData.head.reflSeqCount	=	LocalReadData.head.sendSeqCount;
-		LocalCommandData.head.datagramId	=	FRI_DATAGRAM_ID_CMD;
-		LocalCommandData.head.packetSize	=	sizeof(tFriCmdData);
+		LocalCommandData.Header.FRISequenceCounterForUDPPackages	=	SequenceCounter;
+		LocalCommandData.Header.FRIReflectedSequenceCounterForUDPPackages	=	LocalReadData.Header.FRISequenceCounterForUDPPackages;
+		LocalCommandData.Header.FRIDatagramID	=	FRI_DATAGRAM_ID_CMD;
+		LocalCommandData.Header.FRIPackageSizeInBytes	=	sizeof(FRIDataSendToKRC);
 
-		pthread_mutex_unlock(&(ThisObjectPtr->MutexForControlData));
+		pthread_mutex_unlock(&(ThisObject->MutexForControlData));
 
-		pthread_cond_broadcast(&(ThisObjectPtr->CondVarForDataReceptionFromKRC));
+		pthread_cond_broadcast(&(ThisObject->CondVarForDataReceptionFromKRC));
 
 		// send data to KRC unit
-		ResultValue						=	KRC.Send(&LocalCommandData);
+		ResultValue						=	KRC.SendFRIDataToKRC(&LocalCommandData);
 
 		if (ResultValue != 0)
 		{
-			ThisObjectPtr->OutputConsole->printf("FastResearchInterface::KRCCommunicationThreadMain(): ERROR during the sending of a UDP data package.\n");
+			ThisObject->OutputConsole->printf("FastResearchInterface::KRCCommunicationThreadMain(): ERROR during the sending of a UDP data package.\n");
 		}
 
-		pthread_mutex_lock(&(ThisObjectPtr->MutexForLogging));
+		pthread_mutex_lock(&(ThisObject->MutexForLogging));
 
-		if (ThisObjectPtr->LoggingIsActive)
+		if (ThisObject->LoggingIsActive)
 		{
-			pthread_mutex_unlock(&(ThisObjectPtr->MutexForLogging));
-			ThisObjectPtr->DataLogger->AddEntry(		LocalReadData
-			                                 	,	LocalCommandData);
+			pthread_mutex_unlock(&(ThisObject->MutexForLogging));
+			ThisObject->DataLogger->AddEntry(		LocalReadData
+											 	,	LocalCommandData);
 		}
 		else
 		{
-			pthread_mutex_unlock(&(ThisObjectPtr->MutexForLogging));
+			pthread_mutex_unlock(&(ThisObject->MutexForLogging));
 		}
 	}
 

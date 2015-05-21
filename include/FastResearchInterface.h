@@ -2,31 +2,17 @@
 //! \file FastResearchInterface.h
 //!
 //! \brief
-//! <b>Header file for the class FastResearchInterface</b>
+//! Header file for the class FastResearchInterface
 //!
 //! \details
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -37,15 +23,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -58,7 +51,7 @@
 
 #include <Console.h>
 #include <DataLogging.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 #include <pthread.h>
 
 
@@ -66,8 +59,8 @@
 //! \class FastResearchInterface
 //!
 //! \brief
-//! <b>Provides easy access to \em all functionalities of
-//! Fast Research Interface of the KUKA Light-Weight Robot IV</b>
+//! Provides easy access to \em all functionalities of
+//! Fast Research Interface of the KUKA Light-Weight Robot IV
 //!
 //! \details
 //! This is the main class of the Fast Research Interface Library for the KUKA Light-Weight Robot IV.
@@ -80,7 +73,7 @@
 //! <li>Creating a timer thread that periodically send signal through a condition variable
 //! <li>As soon as the communication thread cyclically receives data telegrams from the KRC unit:
 //! <ul>
-//! <li>Providing robot status information (e.g., temperature, arm power state, errors, warnings, etc.)
+//! <li>Providing robot status information (e.g., FRIDriveTemperature, arm power state, errors, warnings, etc.)
 //! <li>Providing robot control data (e.g., measured joint position vector, measured joint torque vector, etc.)
 //! <li>Providing shared KRL variables
 //! <li>Providing communication status and quality data (e.g., jitter, latency, etc.; measured by the KRC host)
@@ -97,8 +90,9 @@
 //! In order to provide a simple and easy-to-start-with interface, this class is used by (but not derived to) the classes\n
 //! <ul>
 //! <li>LWRJointPositionController for the joint position controller,
-//! <li>LWRCartImpedanceController for the Cartesian impedance controller, and
-//! <li>LWRJointImpedanceController for the joint impedance controller,\n
+//! <li>LWRCartImpedanceController for the Cartesian impedance controller,
+//! <li>LWRJointImpedanceController for the joint impedance controller, and
+//! <li>LWRJointTorqueController for the joint torque controller,\n
 //! </ul>
 //! which are all derived from the class LWRBaseControllerInterface.
 //!
@@ -113,6 +107,7 @@
 //! \sa LWRJointPositionController
 //! \sa LWRCartImpedanceController
 //! \sa LWRJointImpedanceController
+//! \sa LWRJointTorqueController
 //!
 //  ----------------------------------------------------------
 class FastResearchInterface
@@ -171,7 +166,7 @@ public:
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \fn ~FastResearchInterface
+//! \fn ~FastResearchInterface(void)
 //!
 //! \brief
 //! Destructor
@@ -216,6 +211,8 @@ public:
 		CART_IMPEDANCE_CONTROL	=	20,
 		//! \brief Joint impedance control
 		JOINT_IMPEDANCE_CONTROL	=	30,
+		//! \brief Joint torque control
+		JOINT_TORQUE_CONTROL	=	90
 	};
 
 
@@ -278,7 +275,8 @@ public:
 //! <ul>
 //! <li> FastResearchInterface::JOINT_POSITION_CONTROL for joint position control
 //! <li> FastResearchInterface::CART_IMPEDANCE_CONTROL for Cartesian impedance control
-//! <li> FastResearchInterface::JOINT_IMPEDANCE_CONTROL	for joint impedance control\n
+//! <li> FastResearchInterface::JOINT_IMPEDANCE_CONTROL	for joint impedance control
+//! <li> FastResearchInterface::JOINT_TORQUE_CONTROL for joint torque control\n
 //! </ul>
 //! If this method is called by an object derived from the class LWRBaseControllerInterface, this parameter is
 //! automatically set by their respective method for starting the robot.\n\n
@@ -307,7 +305,7 @@ public:
 //! \sa FastResearchInterface::StopRobot()
 //  ----------------------------------------------------------
 	int StartRobot(		const unsigned int &ControlMode
-	               	,	const float &TimeOutValueInSeconds = 120.0);
+				   	,	const float &TimeOutValueInSeconds = 120.0);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -342,8 +340,9 @@ public:
 //! <li>The call of this method does \b not fulfill any real-time requirements.
 //! <li><b>After calling the KRL function <tt>friStop()</tt>, the robot arm power may be still turned on. In the cases of
 //! <ul>
-//! <li>FastResearchInterface::CART_IMPEDANCE_CONTROL or
-//! <li>FastResearchInterface::JOINT_IMPEDANCE_CONTROL
+//! <li>FastResearchInterface::CART_IMPEDANCE_CONTROL,
+//! <li>FastResearchInterface::JOINT_IMPEDANCE_CONTROL, or
+//! <li>FastResearchInterface::JOINT_TORQUE_CONTROL,
 //! </ul>
 //! this may lead to an uncontrolled and/or undesired behavior of the robot arm.</b>
 //! </ul>
@@ -361,7 +360,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
 //! The measured joint position vector is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetMeasuredJointPositions(float *MeasuredJointPositions);
 
@@ -376,7 +375,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
 //! The commanded joint position vector is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCommandedJointPositions(float *CommandedJointPositions);
 
@@ -391,7 +390,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
 //! The commanded joint position offset is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCommandedJointPositionOffsets(float *CommandedJointPositionOffsets);
 
@@ -406,7 +405,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
 //! The measured joint torque vector is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetMeasuredJointTorques(float *MeasuredJointTorques);
 
@@ -421,7 +420,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
 //! The estimated external joint torque vector is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetEstimatedExternalJointTorques(float *EstimatedExternalJointTorques);
 
@@ -436,7 +435,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of twelve elements.
 //! The measured Cartesian pose frame is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetMeasuredCartPose(float *MeasuredCartPose);
 
@@ -451,7 +450,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of twelve elements.
 //! The commanded Cartesian pose frame is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCommandedCartPose(float *CommandedCartPose);
 
@@ -466,7 +465,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of twelve elements.
 //! The commanded Cartesian pose offset frame is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCommandedCartPoseOffsets(float *CommandedCartPoseOffsets);
 
@@ -481,7 +480,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of six elements.
 //! The estimated external force and torque values are written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetEstimatedExternalCartForcesAndTorques(float *EstimatedExternalCartForcesAndTorques);
 
@@ -499,7 +498,7 @@ public:
 //! \note
 //! This value will only be relevant if the joint position or the joint impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedJointPositions(const float *CommandedJointPositions);
 
@@ -517,7 +516,7 @@ public:
 //! \note
 //! This value will only be relevant if the joint impedance or the joint torque controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedJointTorques(const float *CommandedJointTorques);
 
@@ -535,7 +534,7 @@ public:
 //! \note
 //! This value will only be relevant if the joint impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedJointStiffness(const float *CommandedJointStiffness);
 
@@ -553,7 +552,7 @@ public:
 //! \note
 //! This value will only be relevant if the joint impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedJointDamping(const float *CommandedJointDamping);
 
@@ -571,7 +570,7 @@ public:
 //! \note
 //! This value will only be relevant if the Cartesian impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedCartPose(const float *CommandedCartPose);
 
@@ -589,7 +588,7 @@ public:
 //! \note
 //! This value will only be relevant if the Cartesian impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedCartForcesAndTorques(const float *CartForcesAndTorques);
 
@@ -607,7 +606,7 @@ public:
 //! \note
 //! This value will only be relevant if the Cartesian impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedCartStiffness(const float *CommandedCartStiffness);
 
@@ -625,7 +624,7 @@ public:
 //! \note
 //! This value will only be relevant if the Cartesian impedance controller is active.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	void SetCommandedCartDamping(const float *CommandedCartDamping);
 
@@ -642,8 +641,8 @@ public:
 //!  - <tt>FRI_STATE_MON</tt> <em>monitor mode</em>
 //!  - <tt>FRI_STATE_CMD</tt> <em>command mode</em>
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	unsigned int GetFRIMode(void);
 
@@ -659,9 +658,10 @@ public:
 //!  - <tt>FastResearchInterface::JOINT_POSITION_CONTROL</tt> if the joint position controller is currently active
 //!  - <tt>FastResearchInterface::CART_IMPEDANCE_CONTROL</tt> if the Cartesian impedance controller is currently active
 //!  - <tt>FastResearchInterface::JOINT_IMPEDANCE_CONTROL</tt> if the joint impedance controller is currently active
+//!  - <tt>FastResearchInterface::JOINT_TORQUE_CONTROL</tt> if the joint torque controller is currently active
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	unsigned int GetCurrentControlScheme(void);
 
@@ -677,8 +677,8 @@ public:
 //!  - \c true if the arm power is on and the brakes are released
 //!  - \c false if the arm power is off and the brakes are engaged
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	bool IsRobotArmPowerOn(void);
 
@@ -694,8 +694,8 @@ public:
 //!  - \c true if one are more drives signal an error
 //!  - \c false otherwise
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	bool DoesAnyDriveSignalAnError(void);
 
@@ -711,8 +711,8 @@ public:
 //!  - \c true if one are more drives signal a warning
 //!  - \c false otherwise
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	bool DoesAnyDriveSignalAWarning(void);
 
@@ -721,13 +721,13 @@ public:
 //! \fn void GetDriveTemperatures(float *Temperatures)
 //!
 //! \brief
-//! Reads the measured drive temperatures for each drive from the latest data telegram of the KRC unit
+//! Reads the measured drive FRIDriveTemperatures for each drive from the latest data telegram of the KRC unit
 //!
 //! \param Temperatures
 //! A pointer to an array of \c float values; the array has to have at least a size of seven elements.
-//! The measured drive temperatures for each drive is written into this array.
+//! The measured drive FRIDriveTemperatures for each drive is written into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetDriveTemperatures(float *Temperatures);
 
@@ -748,7 +748,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCurrentJacobianMatrix(float **JacobianMatrix);
 
@@ -769,7 +769,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCurrentMassMatrix(float **MassMatrix);
 
@@ -778,11 +778,11 @@ public:
 //! \fn void GetCurrentGravityVector(float *GravityVector)
 //!
 //! \brief
-//! Reads current gravity vector from the latest data telegram of the KRC unit
+//! Reads current gravity vector (transformed into joint space) from the latest data telegram of the KRC unit
 //!
 //! \param GravityVector
-//! A pointer to an two-dimensional array of \c float values the array has to have at least a size of 49 elements.
-//! The current gravity vector is written into this array.
+//! A pointer to an array of \c float values. The current gravity vector 
+//! in joint space is written into this array.
 //!
 //! \warning
 //! This method has never been tested.
@@ -790,7 +790,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	void GetCurrentGravityVector(float *GravityVector);
 
@@ -805,7 +805,7 @@ public:
 //! \return
 //! Communication cycle time in seconds.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	float GetFRICycleTime(void);
 
@@ -818,19 +818,19 @@ public:
 //! (read from the latest data telegram of the KRC unit)
 //!
 //! \return
-//!  - <tt>FRI_QUALITY_UNACCEPTABLE</tt>
-//!  - <tt>FRI_QUALITY_BAD</tt>
-//!  - <tt>FRI_QUALITY_OK</tt>
-//!  - <tt>FRI_QUALITY_PERFECT</tt>
+//!  - <tt>FRI_COMMUNICATION_QUALITY_UNACCEPTABLE</tt>
+//!  - <tt>FRI_COMMUNICATION_QUALITY_BAD</tt>
+//!  - <tt>FRI_COMMUNICATION_QUALITY_OK</tt>
+//!  - <tt>FRI_COMMUNICATION_QUALITY_PERFECT</tt>
 //!
-//! \sa friComm.h
-//! \sa tFriMsrData
+//! \sa FRICommunication.h
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	int GetCommunicationTimingQuality(void);
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \fn float GetUDPAnswerRate(void)
+//! \fn float GetUDPAverageRateOfAnsweredPackages(void)
 //!
 //! \brief
 //! Returns the current answer rate of the remote host measured by the KRC unit
@@ -839,13 +839,13 @@ public:
 //! \return
 //! Answer rate
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
-	float GetUDPAnswerRate(void);
+	float GetUDPAverageRateOfAnsweredPackages(void);
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \fn float GetUDPLatencyInSeconds(void)
+//! \fn float GetUDPAverageLatencyInSeconds(void)
 //!
 //! \brief
 //! Returns the current communication latency measured by the KRC unit
@@ -854,13 +854,13 @@ public:
 //! \return
 //! Current communication latency in seconds
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
-	float GetUDPLatencyInSeconds(void);
+	float GetUDPAverageLatencyInSeconds(void);
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \fn float GetUDPJitterInSeconds(void)
+//! \fn float GetUDPAverageJitterInSeconds(void)
 //!
 //! \brief
 //! Returns the current communication jitter measured by the KRC unit
@@ -869,9 +869,9 @@ public:
 //! \return
 //! Current communication jitter in seconds
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
-	float GetUDPJitterInSeconds(void);
+	float GetUDPAverageJitterInSeconds(void);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -884,7 +884,7 @@ public:
 //! \return
 //! Current data package loss rate
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	float GetUDPPackageLossRate(void);
 
@@ -899,7 +899,7 @@ public:
 //! \return
 //! Number of lost data packages
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	unsigned int GetNumberOfMissedUDPPackages(void);
 
@@ -917,7 +917,7 @@ public:
 //! \return
 //! Current value of the data telegram sequence counter
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //  ----------------------------------------------------------
 	unsigned int GetValueOfKRCSequenceCounter(void);
 
@@ -939,7 +939,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLBoolValue()
 //! \sa FastResearchInterface::SetKRLBoolValues()
 //! \sa \ref sec_KRLFiles
@@ -958,7 +958,7 @@ public:
 //! A pointer to an array of \c int values; the array has to have at least a size of 16 elements.
 //! The integer values set by the KRL program running on the KRC unit are copied into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLIntValue()
 //! \sa FastResearchInterface::SetKRLIntValues()
 //! \sa \ref sec_KRLFiles
@@ -977,7 +977,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of 16 elements.
 //! The floating point values set by the KRL program running on the KRC unit are copied into this array.
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLFloatValue()
 //! \sa FastResearchInterface::SetKRLFloatValues()
 //! \sa \ref sec_KRLFiles
@@ -1004,7 +1004,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLBoolValues()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
@@ -1024,7 +1024,7 @@ public:
 //! \return
 //! The desired \c int value at \c Index
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLIntValues()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
@@ -1044,7 +1044,7 @@ public:
 //! \return
 //! The desired \c float value at \c Index
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa FastResearchInterface::GetKRLFloatValues()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
@@ -1068,7 +1068,7 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLBoolValue()
 //! \sa FastResearchInterface::GetKRLBoolValues()
 //! \sa \ref sec_KRLFiles
@@ -1087,7 +1087,7 @@ public:
 //! A pointer to an array of \c int values; the array has to have at least a size of 16 elements.
 //! The integer values are copied into the data telegram.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLIntValue()
 //! \sa FastResearchInterface::GetKRLIntValues()
 //! \sa \ref sec_KRLFiles
@@ -1106,7 +1106,7 @@ public:
 //! A pointer to an array of \c float values; the array has to have at least a size of 16 elements.
 //! The floating point values are copied into the data telegram.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLFloatValue()
 //! \sa FastResearchInterface::GetKRLFloatValues()
 //! \sa \ref sec_KRLFiles
@@ -1134,13 +1134,13 @@ public:
 //! \todo
 //! Test this method!
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLBoolValues()
 //! \sa FastResearchInterface::GetKRLBoolValue()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
 	void SetKRLBoolValue(		const unsigned int	&Index
-	                     	,	const bool			&Value	);
+						 	,	const bool			&Value	);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1157,13 +1157,13 @@ public:
 //! \param Value
 //! The value to be copied into the data telegram and to read by the KRL program as <tt>\$FRI_FRM_INT[<b>Index</b>]</tt>.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLIntValues()
 //! \sa FastResearchInterface::GetKRLIntValue()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
 	void SetKRLIntValue(		const unsigned int	&Index
-	                    	,	const int			&Value	);
+							,	const int			&Value	);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1180,13 +1180,13 @@ public:
 //! \param Value
 //! The value to be copied into the data telegram and to read by the KRL program as <tt>\$FRI_FRM_REAL[<b>Index</b>]</tt>.
 //!
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //! \sa FastResearchInterface::SetKRLFloatValues()
 //! \sa FastResearchInterface::GetKRLFloatValue()
 //! \sa \ref sec_KRLFiles
 //  ----------------------------------------------------------
 	void SetKRLFloatValue(		const unsigned int	&Index
-	                      	,	const float			&Value	);
+						  	,	const float			&Value	);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1204,7 +1204,7 @@ public:
 //! signal for this condition variable will be generated by the thread
 //! FastResearchInterface::KRCCommunicationThreadMain() immediately after the complete reception of a new
 //! datagram from the KRC unit. The timeout parameter \c TimeoutValueInMicroSeconds is only supported
-//! for the <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>. If this value is set,
+//! for the <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>. If this value is set,
 //! the calling thread will be waked up after the expiration of this timeout value given in \em microseconds.
 //! If this value of \c TimeoutValueInMicroSeconds equals zero, no timeout functionality will be applied, and
 //! the calling thread blocks until a message from the KRC unit is received (or until
@@ -1216,7 +1216,7 @@ public:
 //!
 //! \note
 //! The timeout functionality using the value of \c TimeoutValueInMicroSeconds is only implemented for
-//! <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>.
+//! <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>.
 //!
 //! \return
 //! <ul>
@@ -1225,9 +1225,9 @@ public:
 //! <li> \c ETIMEDOUT if the specified timeout expired.
 //! <li> \c EINVAL if an internal error occurred (cf.
 //! <a href="http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html"
-//! target="_blanc" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html</a> or
+//! target="_blank" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html</a> or
 //! <a href="http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html"
-//! target="_blanc" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html</a>,
+//! target="_blank" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html</a>,
 //! respectively).
 //! </ul>
 //!
@@ -1251,7 +1251,7 @@ public:
 //! signal for this condition variable will be generated by the thread
 //! FastResearchInterface::TimerThreadMain() immediately after its timer expired
 //! The timeout parameter \c TimeoutValueInMicroSeconds is only supported
-//! for the <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>. If this value is set,
+//! for the <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>. If this value is set,
 //! the calling thread will be waked up after the expiration of this timeout value given in \em microseconds.
 //! If this value of \c TimeoutValueInMicroSeconds equals zero, no timeout functionality will be applied, and
 //! the calling thread blocks until a message from the KRC unit is received.
@@ -1262,7 +1262,7 @@ public:
 //!
 //! \note
 //! The timeout functionality using the value of \c TimeoutValueInMicroSeconds is only implemented for
-//! <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>.
+//! <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>.
 //!
 //! \return
 //! <ul>
@@ -1271,9 +1271,9 @@ public:
 //! <li> \c ETIMEDOUT if the specified timeout expired.
 //! <li> \c EINVAL if an internal error occurred (cf.
 //! <a href="http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html"
-//! target="_blanc" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html</a> or
+//! target="_blank" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_wait.html</a> or
 //! <a href="http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html"
-//! target="_blanc" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html</a>,
+//! target="_blank" >http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/p/pthread_cond_timedwait.html</a>,
 //! respectively).
 //! </ul>
 //!
@@ -1319,7 +1319,7 @@ public:
 //! \return
 //! A pointer to an array of \c char values describing the \em complete state of the robot
 //!
-//! \sa tFriMsrData
+//! \sa FRIDataReceivedFromKRC
 //! \sa GetCompleteRobotStateAndInformation.cpp
 //  ----------------------------------------------------------
 	const char* GetCompleteRobotStateAndInformation(void);
@@ -1364,7 +1364,7 @@ public:
 //! \return
 //! <ul>
 //! <li> \c EINVAL if a former logging file has not been closed (i.e., if FastResearchInterface::PrepareLogging()
-//!      was called without a succeeding call of FastResearchInterface::WriteLoggingDataFile().
+//!	  was called without a succeeding call of FastResearchInterface::WriteLoggingDataFile().
 //! <li> \c EBADF if the file could not be created.
 //! <li> \c EOK if no error occurred.
 //! </ul>
@@ -1526,7 +1526,7 @@ protected:
 //!
 //! \details
 //! This method encapsulates a part of the method FastResearchInterface::StartRobot().
-//! It sets controller flags of tFriCmdData and sets up the shared KRL variables
+//! It sets controller flags of FRIDataSendToKRC and sets up the shared KRL variables
 //! used for intercommunication of the Fast Research Library and the KRL program \c FRIControl (cf.\ref sec_KRLFile1).
 //!
 //! \param ControlScheme
@@ -1534,20 +1534,21 @@ protected:
 //! <ul>
 //! <li> FastResearchInterface::JOINT_POSITION_CONTROL for joint position control
 //! <li> FastResearchInterface::CART_IMPEDANCE_CONTROL for Cartesian impedance control
-//! <li> FastResearchInterface::JOINT_IMPEDANCE_CONTROL	for joint impedance control\n
+//! <li> FastResearchInterface::JOINT_IMPEDANCE_CONTROL	for joint impedance control
+//! <li> FastResearchInterface::JOINT_TORQUE_CONTROL for joint torque control\n
 //! </ul>\n
 //!
 //! \return
 //! <ul>
 //! <li> \c EINVAL if the value is not an element of LWRControlModes.
 //! <li> \c ENOTCONN if no connection between the remote host and the KRC unit is available,
-//! <li>    or if the KRC unit does not answer anymore (e.g., due to a manual call of <tt>firClose()</tt>.
+//! <li>	or if the KRC unit does not answer anymore (e.g., due to a manual call of <tt>firClose()</tt>.
 //! <li> \c EBUSY if the KRC unit is already in <em>Command Mode</em>.
 //! <li> \c EOK if no error occurred.
 //! </ul>
 //!
 //! \sa FastResearchInterface::StartRobot()
-//! \sa tFriCmdData
+//! \sa FRIDataSendToKRC
 //  ----------------------------------------------------------
 	int SetControlScheme(const unsigned int &ControlScheme);
 
@@ -1567,7 +1568,7 @@ protected:
 //! A pointer the FastResearchInterface object of the calling thread.
 //!
 //! \note
-//! This method is currently only implemented for the <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>.
+//! This method is currently only implemented for the <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>.
 //!
 //! \todo
 //! Implement this method for other operating systems.
@@ -1585,7 +1586,7 @@ protected:
 //!
 //! \details
 //! This function is the gateway to the KRC unit; it sends and receives data telegrams using the class
-//! friUDP. Right after the reception of one tFriMsrData package, a tFriCmdData is sent back to the
+//! friUDP. Right after the reception of one FRIDataReceivedFromKRC package, a FRIDataSendToKRC is sent back to the
 //! KRC unit. Furthermore, a signal to all other threads is broadcasted through the condition variable
 //! FastResearchInterface::CondVarForDataReceptionFromKRC. Other threads may use the method
 //! FastResearchInterface::WaitForKRCTick() to wait for this signal.
@@ -1619,12 +1620,12 @@ protected:
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \var bool TerminateTimerThread
+//! \var bool TimerThreadIsRunning
 //!
 //! \brief
 //! Used as indication for the timer thread to terminate itself
 //  ----------------------------------------------------------
-	bool					TerminateTimerThread;
+	bool					TimerThreadIsRunning;
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1637,12 +1638,12 @@ protected:
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \var bool TerminateKRCCommunicationThread
+//! \var bool KRCCommunicationThreadIsRunning
 //!
 //! \brief
-//! Flag to terminate the communication thread
+//! Set by the KRC communication thread each time a message from the KRC unit is received
 //  ----------------------------------------------------------
-	bool					TerminateKRCCommunicationThread;
+	bool					KRCCommunicationThreadIsRunning;
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1661,7 +1662,7 @@ protected:
 //! Used by FastResearchInterface::StartLogging() and FastResearchInterface::StopLogging()
 //  ----------------------------------------------------------
 	bool					LoggingIsActive;
-
+	
 
 //  ---------------------- Doxygen info ----------------------
 //! \var bool ThreadCreated
@@ -1673,7 +1674,7 @@ protected:
 //! \sa MutexForThreadCreation
 //! \sa CondVarForThreadCreation
 //  ----------------------------------------------------------
-	bool					ThreadCreated;
+	bool					ThreadCreated;	
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1833,7 +1834,7 @@ protected:
 //  ----------------------------------------------------------
 	pthread_mutex_t			MutexForLogging;
 
-
+	
 //  ---------------------- Doxygen info ----------------------
 //! \var pthread_mutex_t MutexForThreadCreation
 //!
@@ -1864,8 +1865,8 @@ protected:
 //! after the reception of a message from the KRC unit
 //  ----------------------------------------------------------
 	pthread_cond_t			CondVarForDataReceptionFromKRC;
-	
 
+	
 //  ---------------------- Doxygen info ----------------------
 //! \var pthread_mutex_t CondVarForThreadCreation
 //!
@@ -1875,7 +1876,7 @@ protected:
 //! \sa ThreadCreated
 //! \sa MutexForThreadCreation
 //  ----------------------------------------------------------
-	pthread_cond_t			CondVarForThreadCreation;	
+	pthread_cond_t			CondVarForThreadCreation;		
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -1924,21 +1925,21 @@ protected:
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \var tFriMsrData ReadData
+//! \var FRIDataReceivedFromKRC ReadData
 //!
 //! \brief
 //! Data structure object containing a copy of a complete received data telegram from the KRC unit
 //  ----------------------------------------------------------
-	tFriMsrData 			ReadData;
+	FRIDataReceivedFromKRC 			ReadData;
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \var tFriCmdData CommandData
+//! \var FRIDataSendToKRC CommandData
 //!
 //! \brief
 //! Data structure object containing a copy of a complete data telegram to be sent to the KRC unit
 //  ----------------------------------------------------------
-	tFriCmdData				CommandData;
+	FRIDataSendToKRC				CommandData;
 
 };	// class FastResearchInterface
 

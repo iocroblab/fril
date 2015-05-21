@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -56,7 +49,7 @@
 
 #include <FastResearchInterface.h>
 #include <pthread.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 
 
 // ****************************************************************
@@ -67,9 +60,9 @@ void FastResearchInterface::SetCommandedJointPositions(const float *CommandedJoi
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		this->CommandData.cmd.jntPos[i]	=	CommandedJointPositions[i];
+		this->CommandData.CommandValues.FRICommandedJointPositionVectorInRad[i]	=	CommandedJointPositions[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -85,9 +78,9 @@ void FastResearchInterface::SetCommandedJointTorques(const float *CommandedJoint
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		this->CommandData.cmd.addJntTrq[i]	=	CommandedJointTorques[i];
+		this->CommandData.CommandValues.FRICommandedAdditionalJointTorqueVectorInNm[i]	=	CommandedJointTorques[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -103,9 +96,9 @@ void FastResearchInterface::SetCommandedJointStiffness(const float *CommandedJoi
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		this->CommandData.cmd.jntStiffness[i]	=	CommandedJointStiffness[i];
+		this->CommandData.CommandValues.FRICommandedJointStiffnessVectorInNmPerRad[i]	=	CommandedJointStiffness[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -121,9 +114,9 @@ void FastResearchInterface::SetCommandedJointDamping(const float *CommandedJoint
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		this->CommandData.cmd.jntDamping[i]	=	CommandedJointDamping[i];
+		this->CommandData.CommandValues.FRICommandedNormalizedJointDampingVector[i]	=	CommandedJointDamping[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -139,9 +132,9 @@ void FastResearchInterface::SetCommandedCartPose(const float *CommandedCartPose)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_CART_FRM_DIM; i++)
+	for (i = 0; i < NUMBER_OF_FRAME_ELEMENTS; i++)
 	{
-		this->CommandData.cmd.cartPos[i]	=	CommandedCartPose[i];
+		this->CommandData.CommandValues.FRICommandedCartesianFrame[i]	=	CommandedCartPose[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -157,9 +150,9 @@ void FastResearchInterface::SetCommandedCartForcesAndTorques(const float *CartFo
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_CART_VEC; i++)
+	for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
 	{
-		this->CommandData.cmd.addTcpFT[i]	=	CartForcesAndTorques[i];
+		this->CommandData.CommandValues.FRICommandedAdditionalCartesianForceTorqueVector[i]	=	CartForcesAndTorques[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -175,9 +168,9 @@ void FastResearchInterface::SetCommandedCartStiffness(const float *CommandedCart
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_CART_VEC; i++)
+	for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
 	{
-		this->CommandData.cmd.cartStiffness[i]	=	CommandedCartStiffness[i];
+		this->CommandData.CommandValues.FRICommandedCartesianStiffnessVector[i]	=	CommandedCartStiffness[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -193,9 +186,9 @@ void FastResearchInterface::SetCommandedCartDamping(const float *CommandedCartDa
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_CART_VEC; i++)
+	for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
 	{
-		this->CommandData.cmd.cartDamping[i]	=	CommandedCartDamping[i];
+		this->CommandData.CommandValues.FRICommandedNormalizedCartesianDampingVector[i]	=	CommandedCartDamping[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 

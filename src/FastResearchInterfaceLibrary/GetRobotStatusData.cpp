@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -56,9 +49,7 @@
 
 #include <FastResearchInterface.h>
 #include <pthread.h>
-#include <friComm.h>
-
-#include <stdio.h>
+#include <FRICommunication.h>
 
 
 // ****************************************************************
@@ -69,7 +60,7 @@ unsigned int FastResearchInterface::GetFRIMode(void)
 	unsigned int	ReturnValue		=	false;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.state;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIState;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -83,19 +74,26 @@ unsigned int FastResearchInterface::GetCurrentControlScheme(void)
 	unsigned int		ResultValue		=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ResultValue	=	this->ReadData.robot.control;
+	ResultValue	=	this->ReadData.Robot.FRIRobotControl;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	switch (ResultValue)
 	{
-	case FRI_CTRL_POSITION :
+	case FRI_CONTROL_POSITION :
 		return(FastResearchInterface::JOINT_POSITION_CONTROL);
 		break;
-	case FRI_CTRL_CART_IMP:
+	case FRI_CONTROL_CART_IMP:
 		return(FastResearchInterface::CART_IMPEDANCE_CONTROL);
 		break;
-	case FRI_CTRL_JNT_IMP:
-		return(FastResearchInterface::JOINT_IMPEDANCE_CONTROL);
+	case FRI_CONTROL_JNT_IMP:
+		if (this->CurrentControlScheme == FastResearchInterface::JOINT_TORQUE_CONTROL)
+		{
+			return(FastResearchInterface::JOINT_TORQUE_CONTROL);
+		}
+		else
+		{
+			return(FastResearchInterface::JOINT_IMPEDANCE_CONTROL);
+		}
 		break;
 	}
 
@@ -111,7 +109,7 @@ bool FastResearchInterface::IsRobotArmPowerOn(void)
 	bool		ReturnValue		=	false;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	(this->ReadData.robot.power != 0);
+	ReturnValue	=	(this->ReadData.Robot.FRIRobotPower != 0);
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -126,7 +124,7 @@ bool FastResearchInterface::DoesAnyDriveSignalAnError(void)
 	bool		ReturnValue		=	false;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	(this->ReadData.robot.error != 0);
+	ReturnValue	=	(this->ReadData.Robot.FRIDriveError != 0);
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -141,7 +139,7 @@ bool FastResearchInterface::DoesAnyDriveSignalAWarning(void)
 	bool		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	(this->ReadData.robot.warning != 0);
+	ReturnValue	=	(this->ReadData.Robot.FRIDriveWarning != 0);
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -156,9 +154,9 @@ void FastResearchInterface::GetDriveTemperatures(float *Temperatures)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		Temperatures[i]	=	this->ReadData.robot.temperature[i];
+		Temperatures[i]	=	this->ReadData.Robot.FRIDriveTemperature[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -174,9 +172,9 @@ void FastResearchInterface::GetKRLBoolValues(bool *KRLBoolValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
-		KRLBoolValues[i]	=	((this->ReadData.krl.boolData & (1 << i)) != 0);
+		KRLBoolValues[i]	=	((this->ReadData.SharedKRLVariables.FRIBoolValuesInKRC & (1 << i)) != 0);
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -192,9 +190,9 @@ void FastResearchInterface::GetKRLIntValues(int *KRLIntValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
-		KRLIntValues[i]	=	this->ReadData.krl.intData[i];
+		KRLIntValues[i]	=	this->ReadData.SharedKRLVariables.FRIIntegerValuesInKRC[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -210,9 +208,9 @@ void FastResearchInterface::GetKRLFloatValues(float *KRLFloatValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
-		KRLFloatValues[i]	=	this->ReadData.krl.realData[i];
+		KRLFloatValues[i]	=	this->ReadData.SharedKRLVariables.FRIFloatingPointValuesInKRC[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -228,7 +226,7 @@ bool FastResearchInterface::GetKRLBoolValue(const unsigned int &Index)
 	bool		ReturnValue		=	false;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	((this->ReadData.krl.boolData & (1 << Index)) != 0);
+	ReturnValue	=	((this->ReadData.SharedKRLVariables.FRIBoolValuesInKRC & (1 << Index)) != 0);
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -243,7 +241,7 @@ int FastResearchInterface::GetKRLIntValue(const unsigned int &Index)
 	int		ReturnValue		=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.krl.intData[Index];
+	ReturnValue	=	this->ReadData.SharedKRLVariables.FRIIntegerValuesInKRC[Index];
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -258,7 +256,7 @@ float FastResearchInterface::GetKRLFloatValue(const unsigned int &Index)
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.krl.realData[Index];
+	ReturnValue	=	this->ReadData.SharedKRLVariables.FRIFloatingPointValuesInKRC[Index];
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -274,14 +272,14 @@ void FastResearchInterface::GetCurrentJacobianMatrix(float **JacobianMatrix)
 					,	j	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-    for (i = 0; i < FRI_CART_VEC; i++)
-    {
-    	for (j = 0; j < LBR_MNJ; j++)
-    	{
-    		//JacobianMatrix[i][j]	=	this->ReadData.data.jacobian[(i==3)?(5):((i==5)?(3):(i))*LBR_MNJ+j];
-			JacobianMatrix[i][j]	=	this->ReadData.data.jacobian[i*LBR_MNJ+j];
+	for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
+	{
+		for (j = 0; j < NUMBER_OF_JOINTS; j++)
+		{
+			//JacobianMatrix[i][j]	=	this->ReadData.data.FRIJacobianMatrix[(i==3)?(5):((i==5)?(3):(i))*NUMBER_OF_JOINTS+j];
+			JacobianMatrix[i][j]	=	this->ReadData.MeasuredData.FRIJacobianMatrix[i*NUMBER_OF_JOINTS+j];
 		}
-    }
+	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return;
@@ -297,13 +295,13 @@ void FastResearchInterface::GetCurrentMassMatrix(float **MassMatrix)
 					,	j	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-    for (i = 0; i < LBR_MNJ; i++)
-    {
-    	for (j = 0; j < LBR_MNJ; j++)
-    	{
-    		MassMatrix[i][j]	=	this->ReadData.data.massMatrix[i*LBR_MNJ+j];
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
+	{
+		for (j = 0; j < NUMBER_OF_JOINTS; j++)
+		{
+			MassMatrix[i][j]	=	this->ReadData.MeasuredData.FRIMassMatrix[i*NUMBER_OF_JOINTS+j];
 		}
-    }
+	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return;
@@ -318,10 +316,9 @@ void FastResearchInterface::GetCurrentGravityVector(float *GravityVector)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		GravityVector[i]	=	this->ReadData.data.gravity[i];
+		GravityVector[i]	=	this->ReadData.MeasuredData.FRIGravityVectorInJointSpace[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -337,9 +334,9 @@ bool FastResearchInterface::IsMachineOK(void)
 	bool		ReturnValue		=	false;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	(	(this->ReadData.intf.state == FRI_STATE_CMD)
-					&&	(this->ReadData.robot.power != 0)
-					&&	(this->ReadData.robot.error == 0)				);
+	ReturnValue	=	(	(this->ReadData.InterfaceState.FRIState == FRI_STATE_CMD)
+					&&	(this->ReadData.Robot.FRIRobotPower != 0)
+					&&	(this->ReadData.Robot.FRIDriveError == 0)				);
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);

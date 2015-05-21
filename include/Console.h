@@ -8,26 +8,12 @@
 //! The class Console provides the possibility of doing screen
 //! outputs by a low-priority thread. Basically, a real-time
 //! capable \c printf() function is provided.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -38,15 +24,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -124,7 +117,7 @@ public:
 //! The call of the constructor does \b not fulfill any real-time requirements.
 //  ----------------------------------------------------------
 	Console(		const unsigned int 	&Priority
-	        	,	const FILE			*FileHandler = stdout);
+				,	const FILE			*FileHandler = stdout);
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -174,7 +167,7 @@ public:
 //! \return
 //!  - The number characters sent to the file handler Console::Handler.
 //!  - If the capacity of the double buffer is exceeded, \c ENOBUFS is returned, and
-//!    a corresponding string is written to the output in order to acknowledge the user.
+//!	a corresponding string is written to the output in order to acknowledge the user.
 //  ----------------------------------------------------------
 	int printf(const char* Format, ...);
 
@@ -204,6 +197,50 @@ public:
 
 
 protected:
+
+//  ---------------------- Doxygen info ----------------------
+//! \var bool ThreadCreated
+//!
+//! \brief
+//! This flag is set during the thread creation in order to acknowledge the
+//! creating thread.
+//  ----------------------------------------------------------
+	bool				ThreadCreated;
+
+
+//  ---------------------- Doxygen info ----------------------
+//! \var bool ConsoleThreadReadyToRun;
+//!
+//! \brief
+//! This flag is set by the main thread in order to acknowledge the console thread that
+//! it can run its loop.
+//  ----------------------------------------------------------
+	bool				ConsoleThreadReadyToRun;	
+
+
+//  ---------------------- Doxygen info ----------------------
+//! \var bool TermintateThread
+//!
+//! \brief
+//! If this flag is set by the destructor, and if the thread Console::ConsoleThreadMain()
+//! gets waked up by \c pthread_signal(), Console::ConsoleThreadMain() will terminate.
+//  ----------------------------------------------------------
+	bool				TermintateThread;
+
+
+//  ---------------------- Doxygen info ----------------------
+//! \var bool BufferNumber
+//!
+//! \brief
+//! Buffer selection variable
+//!
+//! \details
+//!  - \c false \f$ \longrightarrow \f$ first double buffer half
+//!  - \c true \f$ \longrightarrow \f$ second double buffer half
+//!
+//! This variable is protected by the mutex Console::Mutex.
+//  ----------------------------------------------------------
+	bool				BufferNumber;	
 
 
 //  ---------------------- Doxygen info ----------------------
@@ -252,51 +289,6 @@ protected:
 
 
 //  ---------------------- Doxygen info ----------------------
-//! \var bool ThreadCreated
-//!
-//! \brief
-//! This flag is set during the thread creation in order to acknowledge the
-//! creating thread.
-//  ----------------------------------------------------------
-	bool				ThreadCreated;
-
-
-//  ---------------------- Doxygen info ----------------------
-//! \var bool ConsoleThreadReadyToRun;
-//!
-//! \brief
-//! This flag is set by the main thread in order to acknowledge the console thread that
-//! it can run its loop.
-//  ----------------------------------------------------------
-	bool				ConsoleThreadReadyToRun;
-
-
-//  ---------------------- Doxygen info ----------------------
-//! \var bool TermintateThread
-//!
-//! \brief
-//! If this flag is set by the destructor, and if the thread Console::ConsoleThreadMain()
-//! gets waked up by \c pthread_signal(), Console::ConsoleThreadMain() will terminate.
-//  ----------------------------------------------------------
-	bool				TermintateThread;
-
-
-//  ---------------------- Doxygen info ----------------------
-//! \var bool BufferNumber
-//!
-//! \brief
-//! Buffer selection variable
-//!
-//! \details
-//!  - \c false \f$ \longrightarrow \f$ first double buffer half
-//!  - \c true \f$ \longrightarrow \f$ second double buffer half
-//!
-//! This variable is protected by the mutex Console::Mutex.
-//  ----------------------------------------------------------
-	bool				BufferNumber;
-
-
-//  ---------------------- Doxygen info ----------------------
 //! \var pthread_t ConsoleThread
 //!
 //! \brief
@@ -317,8 +309,8 @@ protected:
 //! \details
 //! This \c pthread_mutex_t object protects
 //!  - the variables Console::BufferNumber between the output data sending
-//!    threads (running under real-time conditions) and the output data writing thread
-//!    Console::ConsoleThreadMain(), and
+//!	threads (running under real-time conditions) and the output data writing thread
+//!	Console::ConsoleThreadMain(), and
 //!  - one half of the double buffer Console::Buffer among the real-time threads.
 //  ----------------------------------------------------------
 	pthread_mutex_t		Mutex;

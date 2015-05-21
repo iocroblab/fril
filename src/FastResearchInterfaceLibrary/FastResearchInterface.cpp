@@ -8,26 +8,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -38,15 +24,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -115,8 +108,8 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 
 	this->OutputConsole						=	new Console(PriorityOutputConsoleThread);
 
-	this->TerminateTimerThread				=	false;
-	this->TerminateKRCCommunicationThread	=	false;
+	this->TimerThreadIsRunning				=	true;
+	this->KRCCommunicationThreadIsRunning	=	true;
 	this->TimerFlag							=	false;
 	this->NewDataFromKRCReceived			=	false;
 	this->LoggingIsActive					=	false;
@@ -126,8 +119,8 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 
 	this->CurrentControlScheme				=	FastResearchInterface::JOINT_POSITION_CONTROL;
 
-	memset((void*)(&(this->CommandData))	, 0x0	,										sizeof(tFriCmdData)	);
-	memset((void*)(&(this->ReadData))		, 0x0	,										sizeof(tFriMsrData)	);
+	memset((void*)(&(this->CommandData))	, 0x0	,										sizeof(FRIDataSendToKRC)	);
+	memset((void*)(&(this->ReadData))		, 0x0	,										sizeof(FRIDataReceivedFromKRC)	);
 
 	pthread_mutex_init(&(this->MutexForControlData				), NULL);
 	pthread_mutex_init(&(this->MutexForCondVarForTimer			), NULL);
@@ -178,7 +171,7 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	this->MainThread = pthread_self();
 	pthread_setschedparam(this->MainThread, SCHED_FIFO, &SchedulingParamsMainThread);
 	
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 	if(!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS))
 	{
@@ -188,10 +181,14 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 #endif
 
 
+#ifdef _NTO_
+
 	FuntionResult	=	pthread_create(		&TimerThread
 										,	&AttributesTimerThread
 										,	&TimerThreadMain
 										,	this);
+										
+								
 
 	if (FuntionResult != EOK)
 	{
@@ -199,7 +196,9 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 		getchar();
 		exit(EXIT_FAILURE); // terminates the process
 	}
-	
+
+	pthread_mutex_lock(&(this->MutexForThreadCreation));	
+
 	while (!ThreadCreated)
 	{
 		pthread_cond_wait (&(this->CondVarForThreadCreation), &(this->MutexForThreadCreation));
@@ -208,18 +207,20 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	ThreadCreated	=	false;
 	pthread_mutex_unlock(&(this->MutexForThreadCreation));	
 
+#endif		
+
 	FuntionResult	=	pthread_create(		&KRCCommunicationThread
 										,	&AttributesKRCCommunicationThread
 										,	&KRCCommunicationThreadMain
 										,	this);
-										
+
 	if (FuntionResult != EOK)
 	{
 		this->OutputConsole->printf("FastResearchInterface::FastResearchInterface(): ERROR, could not start the KRC communication thread (Result: %d).\n", FuntionResult);
 		getchar();
 		exit(EXIT_FAILURE); // terminates the process
 	}
-	
+
 	pthread_mutex_lock(&(this->MutexForThreadCreation));
 
 	while (!ThreadCreated)
@@ -239,12 +240,12 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	}
 	else
 	{
-		sprintf(this->LoggingPath, ".%s", OS_FOLDER_SEPARATOR);
+		sprintf(this->LoggingPath, ".%s\0", OS_FOLDER_SEPARATOR);
 	}
 
 	if (strlen(this->LoggingFileName) == 0)
 	{
-		sprintf(this->LoggingFileName, "FRI.dat");
+		sprintf(this->LoggingFileName, "FRI.dat\0");
 	}
 
 	this->DataLogger	=	new DataLogging(	this->RobotName
@@ -261,12 +262,6 @@ FastResearchInterface::~FastResearchInterface(void)
 {
 	int		ResultValue		=	0;
 
-	// End the timer thread
-	pthread_mutex_lock(&(this->MutexForCondVarForTimer));
-	this->TerminateTimerThread = true;
-	pthread_mutex_unlock(&(this->MutexForCondVarForTimer));
-	pthread_join(this->TimerThread, NULL);
-
 	// Bad workaround for the KUKA friUDP class, which unfortunately
 	// does not use select() for sockets in order to enable timeouts.
 	//
@@ -274,7 +269,7 @@ FastResearchInterface::~FastResearchInterface(void)
 	// established, we have to wake up the communication thread
 	// by sending a signal as it is still waiting for a message
 	// from the KRC.
-	
+
 	pthread_mutex_lock(&(this->MutexForControlData));
 	this->NewDataFromKRCReceived = false;
 	pthread_mutex_unlock(&(this->MutexForControlData));
@@ -320,21 +315,29 @@ FastResearchInterface::~FastResearchInterface(void)
 		// End the KRC communication thread
 		pthread_mutex_unlock(&(this->MutexForControlData));
 		// The UDP communication is working --> normal shutdown
-		this->TerminateKRCCommunicationThread = true;
+		this->KRCCommunicationThreadIsRunning = false;
 		pthread_mutex_unlock(&(this->MutexForControlData));
 	}
 	else
 	{
 		// No UDP communication to KRC and the communication
 		// thread is blocked --> we wake him up manually
-		this->TerminateKRCCommunicationThread = true;
+		this->KRCCommunicationThreadIsRunning = false;
 		pthread_mutex_unlock(&(this->MutexForControlData));
 		pthread_kill(this->KRCCommunicationThread, SIGTERM);
 	}
-	
-#ifndef WIN32
+
 	pthread_join(this->KRCCommunicationThread, NULL);
-#endif
+
+#ifdef _NTO_
+
+	// End the timer thread
+	pthread_mutex_lock(&(this->MutexForCondVarForTimer));
+	this->TimerThreadIsRunning = false;
+	pthread_mutex_unlock(&(this->MutexForCondVarForTimer));
+	pthread_join(this->TimerThread, NULL);
+	
+#endif	
 
 	if (this->LoggingState != FastResearchInterface::WriteLoggingDataFileCalled)
 	{
@@ -357,7 +360,7 @@ int FastResearchInterface::printf(const char* Format,...)
 {
 	int			Result		=	0;
 
-    va_list		ListOfArguments;
+	va_list		ListOfArguments;
 
 	va_start(ListOfArguments, Format);
 

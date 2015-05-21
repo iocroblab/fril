@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -72,26 +65,26 @@
 //
 const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 {
-	bool			BoolArray[FRI_USER_SIZE];
+	bool			BoolArray[SIZE_USER_DATA];
 
 	char			StringPart[512];
 
 	unsigned int	CharCounter			=	0
 				,	i					=	0;
 
-	int				IntArray[FRI_USER_SIZE];
+	int				IntArray[SIZE_USER_DATA];
 
-	float			FloatArray[FRI_USER_SIZE]
-	     		,	FloatMatrix[LBR_MNJ][FRI_CART_VEC];
+	float			FloatArray[SIZE_USER_DATA]
+		 		,	FloatMatrix[NUMBER_OF_JOINTS][NUMBER_OF_CART_DOFS];
 
 	memset((void*)StringPart	, 0x0	,	512						* sizeof(char)	);
-	memset((void*)FloatArray	, 0x0	,	FRI_USER_SIZE			* sizeof(float)	);
-	memset((void*)IntArray		, 0x0	,	FRI_USER_SIZE			* sizeof(float)	);
-	memset((void*)BoolArray		, 0x0	,	FRI_USER_SIZE			* sizeof(bool)	);
+	memset((void*)FloatArray	, 0x0	,	SIZE_USER_DATA			* sizeof(float)	);
+	memset((void*)IntArray		, 0x0	,	SIZE_USER_DATA			* sizeof(float)	);
+	memset((void*)BoolArray		, 0x0	,	SIZE_USER_DATA			* sizeof(bool)	);
 
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
-		memset((void*)(FloatMatrix[i])	, 0x0	,	FRI_CART_VEC	* sizeof(float)	);
+		memset((void*)(FloatMatrix[i])	, 0x0	,	NUMBER_OF_CART_DOFS	* sizeof(float)	);
 	}
 
 	// ---------------------------------------------------------------------------------------------------
@@ -121,16 +114,16 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 	// ---------------------------------------------------------------------------------------------------
 	switch (this->GetCommunicationTimingQuality())
 	{
-	case FRI_QUALITY_UNACCEPTABLE:
+	case FRI_COMMUNICATION_QUALITY_UNACCEPTABLE:
 		sprintf(StringPart, "UDP communication quality: Unacceptable");
 		break;
-	case FRI_QUALITY_BAD:
+	case FRI_COMMUNICATION_QUALITY_BAD:
 		sprintf(StringPart, "UDP communication quality: Bad");
 		break;
-	case FRI_QUALITY_OK:
+	case FRI_COMMUNICATION_QUALITY_OK:
 		sprintf(StringPart, "UDP communication quality: Ok");
 		break;
-	case FRI_QUALITY_PERFECT:
+	case FRI_COMMUNICATION_QUALITY_PERFECT:
 		sprintf(StringPart, "UDP communication quality: Perfect");
 		break;
 	default:
@@ -140,15 +133,15 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
-	sprintf(StringPart, "UDP answer rate: %f percent", 100.0 * this->GetUDPAnswerRate());
+	sprintf(StringPart, "UDP answer rate: %f percent", 100.0 * this->GetUDPAverageRateOfAnsweredPackages());
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
-	sprintf(StringPart, "UDP latency: %f seconds", this->GetUDPLatencyInSeconds());
+	sprintf(StringPart, "UDP latency: %f seconds", this->GetUDPAverageLatencyInSeconds());
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
-	sprintf(StringPart, "UDP jitter: %f seconds", this->GetUDPJitterInSeconds());
+	sprintf(StringPart, "UDP jitter: %f seconds", this->GetUDPAverageJitterInSeconds());
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
@@ -219,7 +212,7 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetKRLFloatValues(FloatArray);
-	sprintf(StringPart, "Float array: %4.f %4.f %4.f %4.f %4.f %f %4.f %4.f %4.f %4.f %4.f %4.f %4.f %4.f %4.f %4.f"
+	sprintf(StringPart, "Float array: %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f"
 			,	FloatArray[ 0]
 			,	FloatArray[ 1]
 			,	FloatArray[ 2]
@@ -253,162 +246,162 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 	// ---------------------------------------------------------------------------------------------------
 	this->GetMeasuredJointPositions(FloatArray);
 	sprintf(StringPart, "Measured joint positions [deg]: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f"
-	        ,	FloatArray[0] * 180.0 / PI
-	        ,	FloatArray[1] * 180.0 / PI
-	        ,	FloatArray[2] * 180.0 / PI
-	        ,	FloatArray[3] * 180.0 / PI
-	        ,	FloatArray[4] * 180.0 / PI
-	        ,	FloatArray[5] * 180.0 / PI
-	        ,	FloatArray[6] * 180.0 / PI);
+			,	FloatArray[0] * 180.0 / PI
+			,	FloatArray[1] * 180.0 / PI
+			,	FloatArray[2] * 180.0 / PI
+			,	FloatArray[3] * 180.0 / PI
+			,	FloatArray[4] * 180.0 / PI
+			,	FloatArray[5] * 180.0 / PI
+			,	FloatArray[6] * 180.0 / PI);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetCommandedJointPositions(FloatArray);
 	sprintf(StringPart, "Commanded joint positions [deg]: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f"
-	        ,	FloatArray[0] * 180.0 / PI
-	        ,	FloatArray[1] * 180.0 / PI
-	        ,	FloatArray[2] * 180.0 / PI
-	        ,	FloatArray[3] * 180.0 / PI
-	        ,	FloatArray[4] * 180.0 / PI
-	        ,	FloatArray[5] * 180.0 / PI
-	        ,	FloatArray[6] * 180.0 / PI);
+			,	FloatArray[0] * 180.0 / PI
+			,	FloatArray[1] * 180.0 / PI
+			,	FloatArray[2] * 180.0 / PI
+			,	FloatArray[3] * 180.0 / PI
+			,	FloatArray[4] * 180.0 / PI
+			,	FloatArray[5] * 180.0 / PI
+			,	FloatArray[6] * 180.0 / PI);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetCommandedJointPositionOffsets(FloatArray);
 	sprintf(StringPart, "Commanded joint position offsets [deg]: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f"
-	        ,	FloatArray[0] * 180.0 / PI
-	        ,	FloatArray[1] * 180.0 / PI
-	        ,	FloatArray[2] * 180.0 / PI
-	        ,	FloatArray[3] * 180.0 / PI
-	        ,	FloatArray[4] * 180.0 / PI
-	        ,	FloatArray[5] * 180.0 / PI
-	        ,	FloatArray[6] * 180.0 / PI);
+			,	FloatArray[0] * 180.0 / PI
+			,	FloatArray[1] * 180.0 / PI
+			,	FloatArray[2] * 180.0 / PI
+			,	FloatArray[3] * 180.0 / PI
+			,	FloatArray[4] * 180.0 / PI
+			,	FloatArray[5] * 180.0 / PI
+			,	FloatArray[6] * 180.0 / PI);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetMeasuredJointTorques(FloatArray);
 	sprintf(StringPart, "Measured joint torques [Nm]: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f"
-	        ,	FloatArray[0]
-	        ,	FloatArray[1]
-	        ,	FloatArray[2]
-	        ,	FloatArray[3]
-	        ,	FloatArray[4]
-	        ,	FloatArray[5]
-	        ,	FloatArray[6]);
+			,	FloatArray[0]
+			,	FloatArray[1]
+			,	FloatArray[2]
+			,	FloatArray[3]
+			,	FloatArray[4]
+			,	FloatArray[5]
+			,	FloatArray[6]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetEstimatedExternalJointTorques(FloatArray);
 	sprintf(StringPart, "Estimated external joint torques [Nm]: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f"
-	        ,	FloatArray[0]
-	        ,	FloatArray[1]
-	        ,	FloatArray[2]
-	        ,	FloatArray[3]
-	        ,	FloatArray[4]
-	        ,	FloatArray[5]
-	        ,	FloatArray[6]);
+			,	FloatArray[0]
+			,	FloatArray[1]
+			,	FloatArray[2]
+			,	FloatArray[3]
+			,	FloatArray[4]
+			,	FloatArray[5]
+			,	FloatArray[6]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetMeasuredCartPose(FloatArray);
 	sprintf(StringPart, "Measured Cart. pose frame: ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 0]
-	        ,	FloatArray[ 1]
-	        ,	FloatArray[ 2]
-	        ,	FloatArray[ 3]);
+			,	FloatArray[ 0]
+			,	FloatArray[ 1]
+			,	FloatArray[ 2]
+			,	FloatArray[ 3]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                           ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 4]
-	        ,	FloatArray[ 5]
-	        ,	FloatArray[ 6]
-	        ,	FloatArray[ 7]);
+	sprintf(StringPart, "						   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 4]
+			,	FloatArray[ 5]
+			,	FloatArray[ 6]
+			,	FloatArray[ 7]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                           ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 8]
-	        ,	FloatArray[ 9]
-	        ,	FloatArray[10]
-	        ,	FloatArray[11]);
+	sprintf(StringPart, "						   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 8]
+			,	FloatArray[ 9]
+			,	FloatArray[10]
+			,	FloatArray[11]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                           ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	0.0
-	        ,	0.0
-	        ,	0.0
-	        ,	1.0);
+	sprintf(StringPart, "						   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	0.0
+			,	0.0
+			,	0.0
+			,	1.0);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetCommandedCartPose(FloatArray);
 	sprintf(StringPart, "Commanded Cart. pose frame: ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 0]
-	        ,	FloatArray[ 1]
-	        ,	FloatArray[ 2]
-	        ,	FloatArray[ 3]);
+			,	FloatArray[ 0]
+			,	FloatArray[ 1]
+			,	FloatArray[ 2]
+			,	FloatArray[ 3]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                            ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 4]
-	        ,	FloatArray[ 5]
-	        ,	FloatArray[ 6]
-	        ,	FloatArray[ 7]);
+	sprintf(StringPart, "							( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 4]
+			,	FloatArray[ 5]
+			,	FloatArray[ 6]
+			,	FloatArray[ 7]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                            ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 8]
-	        ,	FloatArray[ 9]
-	        ,	FloatArray[10]
-	        ,	FloatArray[11]);
+	sprintf(StringPart, "							( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 8]
+			,	FloatArray[ 9]
+			,	FloatArray[10]
+			,	FloatArray[11]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                            ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	0.0
-	        ,	0.0
-	        ,	0.0
-	        ,	1.0);
+	sprintf(StringPart, "							( %12.3f %12.3f %12.3f %12.3f )"
+			,	0.0
+			,	0.0
+			,	0.0
+			,	1.0);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetCommandedCartPoseOffsets(FloatArray);
 	sprintf(StringPart, "Commanded Cart. pose offset frame: ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 0]
-	        ,	FloatArray[ 1]
-	        ,	FloatArray[ 2]
-	        ,	FloatArray[ 3]);
+			,	FloatArray[ 0]
+			,	FloatArray[ 1]
+			,	FloatArray[ 2]
+			,	FloatArray[ 3]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                                   ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 4]
-	        ,	FloatArray[ 5]
-	        ,	FloatArray[ 6]
-	        ,	FloatArray[ 7]);
+	sprintf(StringPart, "								   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 4]
+			,	FloatArray[ 5]
+			,	FloatArray[ 6]
+			,	FloatArray[ 7]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                                   ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	FloatArray[ 8]
-	        ,	FloatArray[ 9]
-	        ,	FloatArray[10]
-	        ,	FloatArray[11]);
+	sprintf(StringPart, "								   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	FloatArray[ 8]
+			,	FloatArray[ 9]
+			,	FloatArray[10]
+			,	FloatArray[11]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
-	sprintf(StringPart, "                                   ( %12.3f %12.3f %12.3f %12.3f )"
-	        ,	0.0
-	        ,	0.0
-	        ,	0.0
-	        ,	1.0);
+	sprintf(StringPart, "								   ( %12.3f %12.3f %12.3f %12.3f )"
+			,	0.0
+			,	0.0
+			,	0.0
+			,	1.0);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetEstimatedExternalCartForcesAndTorques(FloatArray);
 	sprintf(StringPart, "Estimated external Cart. forces/torques: %8.3f N %8.3f N %8.3f N %8.3f Nm %8.3f Nm %8.3f Nm"
-	        ,	FloatArray[0]
-	        ,	FloatArray[1]
-	        ,	FloatArray[2]
-	        ,	FloatArray[3]
-	        ,	FloatArray[4]
-	        ,	FloatArray[5]);
+			,	FloatArray[0]
+			,	FloatArray[1]
+			,	FloatArray[2]
+			,	FloatArray[3]
+			,	FloatArray[4]
+			,	FloatArray[5]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
@@ -476,14 +469,14 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
 	this->GetDriveTemperatures(FloatArray);
-	sprintf(StringPart, "Drive temperatures: %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f"
-	        ,	FloatArray[0]
-	        ,	FloatArray[1]
-	        ,	FloatArray[2]
-	        ,	FloatArray[3]
-	        ,	FloatArray[4]
-	        ,	FloatArray[5]
-	        ,	FloatArray[6]);
+	sprintf(StringPart, "Drive FRIDriveTemperatures: %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f"
+			,	FloatArray[0]
+			,	FloatArray[1]
+			,	FloatArray[2]
+			,	FloatArray[3]
+			,	FloatArray[4]
+			,	FloatArray[5]
+			,	FloatArray[6]);
 	sprintf(&(this->RobotStateString[CharCounter]), "%s\n", StringPart);
 	CharCounter	+=	strlen(StringPart) + 1;
 	// ---------------------------------------------------------------------------------------------------
@@ -497,6 +490,9 @@ const char* FastResearchInterface::GetCompleteRobotStateAndInformation(void)
 		break;
 	case FastResearchInterface::JOINT_IMPEDANCE_CONTROL:
 		sprintf(StringPart, "Control strategy: Joint impedance control");
+		break;
+	case FastResearchInterface::JOINT_TORQUE_CONTROL:
+		sprintf(StringPart, "Control strategy: Joint torque control");
 		break;
 	default:
 		sprintf(StringPart, "Control strategy: UNKNOWN!");

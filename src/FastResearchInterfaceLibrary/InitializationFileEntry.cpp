@@ -8,26 +8,12 @@
 //! The class InitializationFileEntry provides a simple interface to read
 //! entries from an initialization file and to provide in an
 //! application. For details, please refer to the file InitializationFileEntry.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -38,15 +24,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Michael Borchard, Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -78,9 +71,9 @@ InitializationFileEntry::InitializationFileEntry(const char *FileName)
 
 	// Now read the file if desired
 	if (FileName != NULL)
-    {
+	{
 		this->ReadFile(FileName);
-    }
+	}
 }
 
 
@@ -97,17 +90,17 @@ InitializationFileEntry::~InitializationFileEntry(void)
 
 	// delete the successor(s)
 	if (current->Next != NULL)
-    {
+	{
 		current->Next->Prev = NULL;
 		delete (current->Next);
 		current->Next = NULL;
-    }
+	}
 	// delete the predecessors
 	if (current->Prev != NULL)
-    {
+	{
 		delete (current->Prev);
 		current->Prev = NULL;
-    }
+	}
 }
 
 
@@ -125,15 +118,15 @@ bool InitializationFileEntry::Add(const char *Line)
 							,	*EntryPtr	=	NULL;
 	
 	if (((Start = strchr ((char*)Line, '[')) != NULL) && ((End = strchr ((char*)Line, ']')) != NULL))
-    {
+	{
 		// (new) section name found
 		strcpy (this->CurrentSectionName, Start + 1);
 		this->CurrentSectionName[End - Start - 1] = '\0';
 		Result = true;
-    }
+	}
 	else
 	{	if ((Start = strchr ((char*)Line, '=')) != NULL)
-    	{
+		{
 			// entry = value found
 			if ((this->EntryName[0] == '\0') && (this->SectionName[0] == '\0') && (this->Value[0] == '\0') && (this->CurrentSectionName[0] == '\0'))
 			{	
@@ -159,9 +152,9 @@ bool InitializationFileEntry::Add(const char *Line)
 				strcpy (NewEntry->SectionName, this->CurrentSectionName);
 				Result = true;
 			}
-    	}
+		}
 		else
-    	{
+		{
 			// entry line found
 			if ((this->EntryName[0] == '\0') && (this->SectionName[0] == '\0') && (this->Value[0] == '\0') && (this->CurrentSectionName[0] == '\0'))
 			{
@@ -181,12 +174,12 @@ bool InitializationFileEntry::Add(const char *Line)
 				strcpy (NewEntry->EntryName, Line);
 				Result = true;
 			}
-    	}
+		}
 	}
 	
 	// if line contained a new entry it will be appended to the list
 	if ((NewEntry != NULL) && (NewEntry != this))
-    {
+	{
 		// Start with this
 		EntryPtr = this;
 		// and move the pointer to the end of the list
@@ -197,7 +190,7 @@ bool InitializationFileEntry::Add(const char *Line)
 		// append the new entry
 		NewEntry->Prev = EntryPtr;
 		EntryPtr->Next = NewEntry;
-    }
+	}
 	
 	return(Result);
 }
@@ -238,7 +231,7 @@ bool InitializationFileEntry::FindNextSection(void)
 	memset(NameOfSection, 0x0, NAMELEN);
 
 	if (EntryPtr != NULL)
-    {
+	{
 		// cycle through the list until a new section name is found or the end 
 		// of the list is reached
 
@@ -269,7 +262,7 @@ bool InitializationFileEntry::FindNextSection(void)
 		{
 			this->CurrentEntry = this;
 		}
-    }
+	}
 	return(Result);
 }
 
@@ -316,10 +309,10 @@ char *InitializationFileEntry::GetName(void)
 	while (		(this->CurrentEntry->EntryName[Index]	!=	' '	)
 			&&	(this->CurrentEntry->EntryName[Index]	!=	9	)
 			&&	(this->CurrentEntry->EntryName[Index]	!=	0	))
-    {
+	{
 		this->Name[Index] = this->CurrentEntry->EntryName[Index];
 		Index++;
-    }
+	}
 	this->Name[Index] = 0;
 	
 	return(Name);
@@ -351,7 +344,7 @@ bool InitializationFileEntry::FindEntry(const char *Name)
 	
 	// Cycle through the list until the name is found or the end of the list is reached
 	while ((EntryPtr != NULL) && !Found)
-    {
+	{
 		if (!strcmp (Name, EntryPtr->EntryName))
 		{
 			// set Found if the name matches
@@ -362,15 +355,15 @@ bool InitializationFileEntry::FindEntry(const char *Name)
 			// else check the next entry
 			EntryPtr = EntryPtr->Next;
 		}
-    }
+	}
 	
 	if (Found)
 	// If the name could be found set the current entry to it
 	// and set the result to true.
-    {
+	{
 		this->CurrentEntry = EntryPtr;
 		Result = true;
-    }
+	}
 	
 	return(Result);
 }
@@ -416,9 +409,9 @@ void InitializationFileEntry::ReadFile(const char *FileName)
 			}
 		}
 		fclose(FileHandler);
-    } 
-    else
-    {
-    	fprintf(stderr, "InitializationFileEntry: ERROR! File \"%s\" cannot be read !\n", FileName);
-    }
+	} 
+	else
+	{
+		fprintf(stderr, "InitializationFileEntry: ERROR! File \"%s\" cannot be read !\n", FileName);
+	}
 }

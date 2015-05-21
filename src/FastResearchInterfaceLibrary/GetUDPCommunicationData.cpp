@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -56,7 +49,7 @@
 
 #include <FastResearchInterface.h>
 #include <pthread.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 
 
 // ****************************************************************
@@ -67,7 +60,7 @@ float FastResearchInterface::GetFRICycleTime(void)
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.desiredCmdSampleTime;
+	ReturnValue	=	this->ReadData.InterfaceState.FRISampleTimePeriodForDataSentToKRC;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -82,7 +75,7 @@ int FastResearchInterface::GetCommunicationTimingQuality(void)
 	int		ReturnValue		=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.quality;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIQuality;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -90,14 +83,14 @@ int FastResearchInterface::GetCommunicationTimingQuality(void)
 
 
 // ****************************************************************
-// GetUDPAnswerRate()
+// GetUDPAverageRateOfAnsweredPackages()
 //
-float FastResearchInterface::GetUDPAnswerRate(void)
+float FastResearchInterface::GetUDPAverageRateOfAnsweredPackages(void)
 {
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.stat.answerRate;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIStatistics.AverageRateOfAnsweredPackages;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -105,14 +98,14 @@ float FastResearchInterface::GetUDPAnswerRate(void)
 
 
 // ****************************************************************
-// GetUDPLatencyInSeconds()
+// GetUDPAverageLatencyInSeconds()
 //
-float FastResearchInterface::GetUDPLatencyInSeconds(void)
+float FastResearchInterface::GetUDPAverageLatencyInSeconds(void)
 {
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.stat.latency;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIStatistics.AverageLatencyInSeconds;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -120,14 +113,14 @@ float FastResearchInterface::GetUDPLatencyInSeconds(void)
 
 
 // ****************************************************************
-// GetUDPJitterInSeconds()
+// GetUDPAverageJitterInSeconds()
 //
-float FastResearchInterface::GetUDPJitterInSeconds(void)
+float FastResearchInterface::GetUDPAverageJitterInSeconds(void)
 {
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.stat.jitter;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIStatistics.AverageJitterInSeconds;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -142,7 +135,7 @@ float FastResearchInterface::GetUDPPackageLossRate(void)
 	float		ReturnValue		=	0.0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.stat.missRate;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIStatistics.AverageRateOfMissedPackages;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -157,7 +150,7 @@ unsigned int FastResearchInterface::GetNumberOfMissedUDPPackages(void)
 	unsigned int		ReturnValue		=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.intf.stat.missCounter;
+	ReturnValue	=	this->ReadData.InterfaceState.FRIStatistics.AbsoluteNumberOfMissedPackages;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);
@@ -172,7 +165,7 @@ unsigned int FastResearchInterface::GetValueOfKRCSequenceCounter(void)
 	unsigned int		ReturnValue		=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	ReturnValue	=	this->ReadData.head.sendSeqCount;
+	ReturnValue	=	this->ReadData.Header.FRISequenceCounterForUDPPackages;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
 	return(ReturnValue);

@@ -4,27 +4,11 @@
 //! \brief
 //! Documentation file for Doxygen
 //!
-//! \details
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -35,15 +19,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -56,7 +47,7 @@
 \section sec_Introduction Introduction
 
 The Fast Research Interface Library intends to provide a simple user interface
-to the <a href="http://www.kuka-labs.com" target="_blanc">KUKA</a>
+to the <a href="http://www.kuka-labs.com" target="_blank">KUKA</a>
 Light-Weight Robot IV and hides all communication and set-up issues behind
 interface. It is only an \b interface and it does \b not contain any control
 functionalities. Without much installation efforts, access to different controller
@@ -69,9 +60,9 @@ interfaces of the KUKA system is provided:
 The Fast Research Interface Library runs on a remote PC node with is connected
 to the KRC (KUKA Robot Controller) via an Ethernet connection. In intervals of 1 to 100 milliseconds,
 UDP packages are periodically sent from the KRC unit to the remote host. These packages contain
-a complete set of robot control and status data (e.g., joint positions, joint torques, drive temperatures,
+a complete set of robot control and status data (e.g., joint positions, joint torques, drive FRIDriveTemperatures,
 etc.; cf. FRI User Documentation).
-The remote host (e.g., with <a href="http://www.qnx.com" target="_blanc" >QNX Neutrino RTOS</a>) has to instantaneously send a reply message after the reception of each package. A reply message
+The remote host (e.g., with <a href="http://www.qnx.com" target="_blank" >QNX Neutrino RTOS</a>) has to instantaneously send a reply message after the reception of each package. A reply message
 contains input data for the applied controllers (e.g., joint position set-points, joint stiffness set-points,
 etc.). This way, users become able to set-up own control architectures and/or application-specific controllers
 for the light-weight arm as it is often desired at research institutions.\n\n
@@ -184,6 +175,20 @@ The provided KRL file (\ref page_KRLFile1 "FRIControl.src") and the initializati
 \n\n\n</li>
 
 </ul>
+\section sec_Copyright Copyright and License
+Copyright 2014 Stanford University\n
+\n
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at\n
+\n
+<a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" >http://www.apache.org/licenses/LICENSE-2.0</a>\n
+\n
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.\n
 
 */
 // -----------------------------------------------------------------
@@ -347,6 +352,17 @@ DataLogging::OutputFileName). \n\n
 - Porting to MacOS
 - Update to <em>KUKA Systems Software 5.6 lr</em>
 - Bug fixes in KRL code
+\section sec_VersionHistory4 Version 1.0.1 (October 2013)
+- Makefiles adaptation (Thanks to Matei Ciocarlie)
+- Minor improvements and fixes
+\section sec_VersionHistory5 Version 1.1 (March 2014)
+- Released under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" >Apache V2</a>
+- Minor improvements and fixes
+- Re-implementation of UDP socket communication (cf. files UDPSocket.h, FRICommunication.h, UDPSocket.cpp)
+\section sec_VersionHistory5 Version 1.2 (December 2014)
+- Removed POSIX thread barriers to be compatible with MacOS
+
+
 */
 // -----------------------------------------------------------------
 
@@ -354,22 +370,18 @@ DataLogging::OutputFileName). \n\n
 \page page_QNX Download and Installation Instructions: QNX Neutrino
 
 \n
-<b>Download URL for Linux or Solaris hosted IDEs</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.zip</b></a>\n\n
-<b>Download URL for Windows hosted IDEs</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz</b></a>\n\n
+<b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.zip"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.zip</b></a>\n\n
 
 
-Download the file and copy it to a directory of yours (e.g.,
+Please download the file and copy it to a directory of yours (e.g.,
 <tt>C:\\Users\\MyUsername\\FRI</tt> under Windows or <tt>/home/MyUsername/FRI</tt>
-under Linux). After unzipping the compressed file
+under Linux) and unzip the file the compressed file
 with a tool (e.g.,
-<a href="http://www.7-zip.org" title="http://www.7-zip.org" target="_blanc" ><b>7-Zip</b></a>
+<a href="http://www.7-zip.org" title="http://www.7-zip.org" target="_blank" ><b>7-Zip</b></a>
 or
-<a href="http://www.gzip.org" title="http://www.gzip.org" target="_blanc" ><b>gzip</b></a>),
-you need to replace the three files <c>friComm.h</c>, <c>friudp.h</c>, and
-<c>friudp.cpp</c> with the original files you received from KUKA (cf. 
-<a href="files.html">List of Files</a>). Afterwards you create a new
-project in you QNX Momentics IDE and specify the absolute path of the 
-directory
+<a href="http://www.gzip.org" title="http://www.gzip.org" target="_blank" ><b>gzip</b></a>).
+Afterwards you create a new project in you QNX Momentics IDE and specify
+the absolute path of the directory
 \code
 FRILibrary
 \endcode
@@ -398,18 +410,15 @@ establish a connection form the remote host to the KRC control unit.
 \page page_Linux Download and Installation Instructions: Linux
 
 \n
-<b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz</b></a>\n\n
+<b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.zip"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.zip</b></a>\n\n
 
-Download the file and copy it to a directory of yours (e.g.,
-<tt>/home/MyUsername/FRI</tt>). After unzipping the compressed file
+Please download the file and copy it to a directory of yours (e.g.,
+<tt>/home/MyUsername/FRI</tt>)and unzip the compressed file
 with
 \code
-tar -xf fril.tar.gz
+unzip fril.zip
 \endcode
-you need to replace the three files <c>friComm.h</c>, <c>friudp.h</c>, and
-<c>friudp.cpp</c> with the original files you received from KUKA (cf. 
-<a href="files.html">List of Files</a>). Afterwards, you change to the
-directory <tt>FRILibrary/Linux</tt> and enter
+Afterwards, you change to the directory <tt>FRILibrary/Linux</tt> and enter
 \code
 make clean all
 \endcode
@@ -439,18 +448,14 @@ the marked lines in the file <b>ExternalTargets.global</b>.
 \page page_MACOS Download and Installation Instructions: MacOS
 
 \n
-<b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.tar.gz</b></a>\n\n
+<b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.zip"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.zip</b></a>\n\n
 
-Download the file and copy it to a directory of yours (e.g.,
-<tt>/home/MyUsername/FRI</tt>). After unzipping the compressed file
-with
+Please download the file and copy it to a directory of yours (e.g.,
+<tt>/home/MyUsername/FRI</tt>) and unzip the compressed file with
 \code
-tar -xf fril.tar.gz
+unzip fril.zip
 \endcode
-you need to replace the three files <c>friComm.h</c>, <c>friudp.h</c>, and
-<c>friudp.cpp</c> with the original files you received from KUKA (cf. 
-<a href="files.html">List of Files</a>). Afterwards, you change to the
-directory <tt>FRILibrary/Linux</tt> and enter
+Afterwards, you change to the directory <tt>FRILibrary/MacOS</tt> and enter
 \code
 make clean all
 \endcode
@@ -475,19 +480,16 @@ establish a connection form the remote host to the KRC control unit.
 \n
 <b>Download URL</b>: <a href="http://cs.stanford.edu/people/tkr/fri/download/fril.zip"><b>http://cs.stanford.edu/people/tkr/fri/download/fril.zip</b></a>\n\n
 
-Download the file and copy it to a directory of yours (e.g.,
-<tt>C:\\Users\\MyUsername\\FRI</tt>). After unzipping the compressed file
+Please download the file and copy it to a directory of yours (e.g.,
+<tt>C:\\Users\\MyUsername\\FRI</tt>) and unzip the compressed file
 with a tool (e.g.,
-<a href="http://www.7-zip.org" title="http://www.7-zip.org" target="_blanc" ><b>7-Zip</b></a>),
-you need to replace the three files <c>friComm.h</c>, <c>friudp.h</c>, and
-<c>friudp.cpp</c> with the original files you received from KUKA (cf. 
-<a href="files.html">List of Files</a>). Afterwards you open the Visual
-Studio solution file
+<a href="http://www.7-zip.org" title="http://www.7-zip.org" target="_blank" ><b>7-Zip</b></a>).
+Afterwards you open the Visual Studio solution file
 \code
 FRILibrary\Windows\FastResearchLibrary.sln
 \endcode
 with your
-<a href="http://www.microsoft.com/visualstudio" target="_blanc" title="" ><b>Microsoft Visual Studio</b></a>
+<a href="http://www.microsoft.com/visualstudio" target="_blank" title="" ><b>Microsoft Visual Studio</b></a>
 development environment. You may rebuild the entire solution to check
 whether all files compile correctly on your system.
 If so, you may continue with \ref StepFour "Step 4 of the Quick Start Manual".

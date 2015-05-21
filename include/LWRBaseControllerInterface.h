@@ -11,26 +11,13 @@
 //!  - class LWRJointPositionController
 //!  - class CartImpedanceController
 //!  - class LWRJointImpedanceController
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!  - class LWRJointTorqueController
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -41,15 +28,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -60,7 +54,7 @@
 #define __LWRBaseControllerInterface__
 
 #include <FastResearchInterface.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 #include <OSAbstraction.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -75,12 +69,13 @@
 //! KUKA Fast Research Interface for the Light-Weight Robot IV
 //!
 //! \details
-//! This class constitutes the base class for the three different controller interface classes, which represent the
+//! This class constitutes the base class for the four different controller interface classes, which represent the
 //! actual user API for the Fast Research Library:
 //! <ul>
 //! <li>LWRJointPositionController for the joint position controller,
-//! <li>LWRCartImpedanceController for the Cartesian impedance controller, and
-//! <li>LWRJointImpedanceController for the joint impedance controller,\n\n
+//! <li>LWRCartImpedanceController for the Cartesian impedance controller,
+//! <li>LWRJointImpedanceController for the joint impedance controller, and
+//! <li>LWRJointTorqueController for the joint torque controller,\n\n
 //! </ul>
 //! This base class only features one attribute, which is a pointer to an object of the class FastResearchInterface.
 //! Most of the functionality of the class FastResearchInterface remains hidden, and only a small subset that is
@@ -90,6 +85,7 @@
 //! \sa LWRJointPositionController
 //! \sa LWRCartImpedanceController
 //! \sa LWRJointImpedanceController
+//! \sa LWRJointTorqueController
 //  ----------------------------------------------------------
 
 class LWRBaseControllerInterface
@@ -305,7 +301,7 @@ public:
 	inline int printf(const char* Format, ...)
 	{
 		int			Result		=	0;
-	    va_list		ListOfArguments;
+		va_list		ListOfArguments;
 
 		va_start(ListOfArguments, Format);
 		Result = FRI->printf(Format, ListOfArguments);

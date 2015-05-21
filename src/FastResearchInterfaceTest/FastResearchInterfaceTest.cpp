@@ -8,26 +8,12 @@
 //! This simple test application features a sample of how to use the Fast Research Interface
 //! of the KUKA Light-Weight Robot IV. For details about the actual interface class (i.e.,
 //! class FastResearchInterface), please refer to the file FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -38,15 +24,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -91,31 +84,31 @@ int main(int argc, char *argv[])
 
 	int						ResultValue					=	0;
 
-	float					FloatValues[FRI_USER_SIZE]
-	     				,	TmpFloatValues[FRI_USER_SIZE]
-	     				,	DesiredTorqueValues[LBR_MNJ]
-	     				,	JointStiffnessValues[LBR_MNJ]
-	     				,	JointDampingValues[LBR_MNJ]
-	     				,	CartStiffnessValues[FRI_CART_VEC]
-	     				,	CartDampingValues[FRI_CART_VEC];
+	float					FloatValues[SIZE_USER_DATA]
+		 				,	TmpFloatValues[SIZE_USER_DATA]
+		 				,	DesiredTorqueValues[NUMBER_OF_JOINTS]
+		 				,	JointStiffnessValues[NUMBER_OF_JOINTS]
+		 				,	JointDampingValues[NUMBER_OF_JOINTS]
+		 				,	CartStiffnessValues[NUMBER_OF_CART_DOFS]
+		 				,	CartDampingValues[NUMBER_OF_CART_DOFS];
 
 	FastResearchInterface	*FRI;
 
 
 
 	memset(TransferString		, 0x0	, SIZE_OF_TRANSFER_STRING	* sizeof(char)	);
-	memset(FloatValues			, 0x0	, FRI_USER_SIZE				* sizeof(float)	);
-	memset(TmpFloatValues		, 0x0	, FRI_USER_SIZE				* sizeof(float)	);
-	memset(DesiredTorqueValues	, 0x0	, LBR_MNJ					* sizeof(float)	);
+	memset(FloatValues			, 0x0	, SIZE_USER_DATA				* sizeof(float)	);
+	memset(TmpFloatValues		, 0x0	, SIZE_USER_DATA				* sizeof(float)	);
+	memset(DesiredTorqueValues	, 0x0	, NUMBER_OF_JOINTS					* sizeof(float)	);
 
-#ifdef WIN32
-	FRI = new FastResearchInterface("E:\\Stanford\\Research\\SourceCode\\LWR_Public\\etc\\980039-FRI-Driver.init");
+#if defined(WIN32) || defined(WIN64) || defined(_WIN64)
+	FRI = new FastResearchInterface("E:\\Stanford\\Research\\SourceCode\\LWR_Public_2014\\etc\\980039-FRI-Driver.init");
 #endif
 
 #ifdef __LINUX__
 	fprintf(stdout, "You may need superuser permission to run this program.\n");
 	fflush(stdout);
-	FRI = new FastResearchInterface("../etc/980039-FRI-Driver.init");
+	FRI = new FastResearchInterface("/home/torsten/etc/980039-FRI-Driver.init");
 #endif
 
 #ifdef __MACOS__
@@ -126,13 +119,13 @@ int main(int argc, char *argv[])
 	FRI = new FastResearchInterface("/home/lwrcontrol/etc/980039-FRI-Driver2ms.init");
 #endif
 
-	for (i = 0; i < LBR_MNJ; i++)
+	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
 		JointStiffnessValues	[i] =	(float)10.0;
 		JointDampingValues		[i]	=	(float)0.7;
 	}
 
-	for (i = 0; i < FRI_CART_VEC; i++)
+	for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
 	{
 		CartStiffnessValues		[i]	=	(float)10.0;
 		CartDampingValues		[i]	=	(float)0.7;
@@ -146,22 +139,22 @@ int main(int argc, char *argv[])
 	while (Run)
 	{
 		printf("---------------------------------------------------------------------------------------\n");
-		printf("Press     q  for exit this program\n");
-		printf("          s  for starting the KUKA Fast Research Interface\n");
-		printf("          x  for stopping the KUKA Fast Research Interface\n");
-		printf("          p  for printing system information\n");
-		printf("          d  for changing 'D' (damping term) of the joint impedance controller\n");
-		printf("          k  for changing 'k' (stiffness term) of the joint impedance controller\n");
-		printf("          e  for changing 'D' (damping term) of the Cartesian impedance controller\n");
-		printf("          l  for changing 'k' (stiffness term) of the Cartesian impedance controller\n");
-		printf("          m  for getting the current parameters of the joint impedance controller\n");
-		printf("          n  for getting the current parameters of the Cartesian impedance controller\n");
-		printf("          g  for getting the current joint positions\n");
-		printf("          h  for getting the current joint torques\n");
-		printf("          i  for starting writing to an output file\n");
-		printf("          j  for stopping writing to an output file\n");
-		printf("          t  for start the joint position controller and run a simple trajectory\n");
-		printf("          c  for moving to the candle position\n");
+		printf("Press	 q  for exit this program\n");
+		printf("		  s  for starting the KUKA Fast Research Interface\n");
+		printf("		  x  for stopping the KUKA Fast Research Interface\n");
+		printf("		  p  for printing system information\n");
+		printf("		  d  for changing 'D' (damping term) of the joint impedance controller\n");
+		printf("		  k  for changing 'k' (stiffness term) of the joint impedance controller\n");
+		printf("		  e  for changing 'D' (damping term) of the Cartesian impedance controller\n");
+		printf("		  l  for changing 'k' (stiffness term) of the Cartesian impedance controller\n");
+		printf("		  m  for getting the current parameters of the joint impedance controller\n");
+		printf("		  n  for getting the current parameters of the Cartesian impedance controller\n");
+		printf("		  g  for getting the current joint positions\n");
+		printf("		  h  for getting the current joint torques\n");
+		printf("		  i  for starting writing to an output file\n");
+		printf("		  j  for stopping writing to an output file\n");
+		printf("		  t  for start the joint position controller and run a simple trajectory\n");
+		printf("		  c  for moving to the candle position\n");
 		printf("---------------------------------------------------------------------------------------\n\n");
 		printf("Please press any key...\n");
 
@@ -274,11 +267,11 @@ int main(int argc, char *argv[])
 
 			if ( (c == 'd') || (c == 'D') || (c == 'k') || (c == 'K') )
 			{
-				LoopValue	=	 LBR_MNJ;
+				LoopValue	=	 NUMBER_OF_JOINTS;
 			}
 			else
 			{
-				LoopValue	=	 FRI_CART_VEC;
+				LoopValue	=	 NUMBER_OF_CART_DOFS;
 			}
 
 			printf("\nWould you like to enter one value for all vector elements (a) or for each individual one (i)?\n");
@@ -404,7 +397,7 @@ int main(int argc, char *argv[])
 		case 'G':
 			printf("Getting joint position values...\n");
 			FRI->GetMeasuredJointPositions(FloatValues);
-			for (i = 0; i < LBR_MNJ; i++)
+			for (i = 0; i < NUMBER_OF_JOINTS; i++)
 			{
 				printf("Joint position %d: %8.3f degrees\n", i, FloatValues[i] * 180.0 / PI);
 			}
@@ -413,12 +406,12 @@ int main(int argc, char *argv[])
 		case 'm':
 		case 'M':
 			printf("Getting the current parameters of the joint impedance controller\n");
-			for (i = 0; i < LBR_MNJ; i++)
+			for (i = 0; i < NUMBER_OF_JOINTS; i++)
 			{
 				printf("Joint stiffness values %d: %8.3f Nm\n", i, JointStiffnessValues[i]);
 			}
 			printf("\n");
-			for (i = 0; i < LBR_MNJ; i++)
+			for (i = 0; i < NUMBER_OF_JOINTS; i++)
 			{
 				printf("Joint damping values %d: %8.3f Nms\n", i, JointDampingValues[i]);
 			}
@@ -450,7 +443,7 @@ int main(int argc, char *argv[])
 		case 'H':
 			printf("Getting joint torque values...\n");
 			FRI->GetMeasuredJointTorques(FloatValues);
-			for (i = 0; i < LBR_MNJ; i++)
+			for (i = 0; i < NUMBER_OF_JOINTS; i++)
 			{
 				printf("Joint position %d: %8.3f Nm\n", i, FloatValues[i]);
 			}

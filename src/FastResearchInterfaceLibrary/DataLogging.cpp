@@ -9,26 +9,12 @@
 //! data that is exchanged between the remote host and the KRC unit to an
 //! output file. For further details, please refer to the file
 //! DataLogging.h
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -87,8 +80,8 @@
 //
 DataLogging::DataLogging(		const char			*RobotName
 							,	const char			*LoggingPath
-                           	,	const char			*LoggingFileName
-                           	,	const unsigned int	&MaxNumberOfEntries)
+						   	,	const char			*LoggingFileName
+						   	,	const unsigned int	&MaxNumberOfEntries)
 {
 	unsigned int			i		=	0;
 
@@ -108,15 +101,15 @@ DataLogging::DataLogging(		const char			*RobotName
 		this->LoggingMemory[i]		=	new float[MaxNumberOfEntries];
 
 		memset(		this->LoggingMemory[i]
-		       ,	0x0
-		       ,	this->MaximumNumberOfEntries * sizeof(float)	);
+			   ,	0x0
+			   ,	this->MaximumNumberOfEntries * sizeof(float)	);
 	}
 
 	this->CompleteOutputFileString	=	new char[OUTPUT_FILE_STRING_LENGTH];
 
 	memset(		this->CompleteOutputFileString
-	       	,	0x0
-	       	,	OUTPUT_FILE_STRING_LENGTH * sizeof(char));
+		   	,	0x0
+		   	,	OUTPUT_FILE_STRING_LENGTH * sizeof(char));
 
 }
 
@@ -147,7 +140,7 @@ DataLogging::~DataLogging(void)
 // PrepareLogging()
 //
 int DataLogging::PrepareLogging(		const unsigned int	&ControlScheme
-                                	,	const char			*FileIdentifier)
+									,	const char			*FileIdentifier)
 {
 	char				TimeString[TIME_STRING_LENGTH];
 
@@ -156,8 +149,8 @@ int DataLogging::PrepareLogging(		const unsigned int	&ControlScheme
 	time_t				CurrentDayTime;
 
 	memset(		TimeString
-		    ,	0x0
-		    ,	TIME_STRING_LENGTH * sizeof(char));
+			,	0x0
+			,	TIME_STRING_LENGTH * sizeof(char));
 
 	this->CurrentControlScheme	=	ControlScheme;
 
@@ -187,14 +180,14 @@ int DataLogging::PrepareLogging(		const unsigned int	&ControlScheme
 #endif
 
 	memset(		this->CompleteOutputFileString
-	       	,	0x0
-	       	,	OUTPUT_FILE_STRING_LENGTH * sizeof(char));
+		   	,	0x0
+		   	,	OUTPUT_FILE_STRING_LENGTH * sizeof(char));
 
 	for (i = 0; i < NUMBER_OF_ELEMENTS_PER_ENTRY; i++)
 	{
 		memset(		this->LoggingMemory[i]
-		       ,	0x0
-		       ,	this->MaximumNumberOfEntries * sizeof(float)	);
+			   ,	0x0
+			   ,	this->MaximumNumberOfEntries * sizeof(float)	);
 	}
 
 	CurrentDayTime = time(NULL);
@@ -233,6 +226,10 @@ int DataLogging::PrepareLogging(		const unsigned int	&ControlScheme
 			fprintf(this->OutputFileHandler, "Active control scheme: joint impedance control\n\n");
 			fprintf(this->OutputFileHandler, "Counter	KRCTime	LocalTime	ActFJ1	ActFJ2	ActFJ3	ActFJ4	ActFJ5	ActFJ6	ActFJ7	UDesPJ1	UDesPJ2	UDesPJ3	UDesPJ4	UDesPJ5	UDesPJ6	UDesPJ7	ActPJ1	ActPJ2	ActPJ3	ActPJ4	ActPJ5	ActPJ6	ActPJ7	KDesPJ1	KDesPJ2	KDesPJ3	KDesPJ4	KDesPJ5	KDesPJ6	KDesPJ7	DesKJ1	DesKJ2	DesKJ3	DesKJ4	DesKJ5	DesKJ6	DesKJ7	DesDJ1	DesDJ2	DesDJ3	DesDJ4	DesDJ5	DesDJ6	DesDJ7	UDesFJ1	UDesFJ2	UDesFJ3	UDesFJ4	UDesFJ5	UDesFJ6	UDesFJ7	KOffPJ1	KOffPJ2	KOffPJ3	KOffPJ4	KOffPJ5	KOffPJ6	KOffPJ7\n");
 			break;
+		case FastResearchInterface::JOINT_TORQUE_CONTROL:
+			fprintf(this->OutputFileHandler, "Active control scheme: joint torque control\n\n");
+			fprintf(this->OutputFileHandler, "Counter	KRCTime	LocalTime	ActFJ1	ActFJ2	ActFJ3	ActFJ4	ActFJ5	ActFJ6	ActFJ7	ActPJ1	ActPJ2	ActPJ3	ActPJ4	ActPJ5	ActPJ6	ActPJ7	UDesFJ1	UDesFJ2	UDesFJ3	UDesFJ4	UDesFJ5	UDesFJ6	UDesFJ7\n");
+			break;
 		default:
 			return(EINVAL);
 		}
@@ -250,48 +247,58 @@ int DataLogging::PrepareLogging(		const unsigned int	&ControlScheme
 // ****************************************************************
 // AddEntry()
 //
-void DataLogging::AddEntry(		const tFriMsrData		&ReceivedFRIData
-                           	,	const tFriCmdData		&SentFRIData		)
+void DataLogging::AddEntry(		const FRIDataReceivedFromKRC		&ReceivedFRIData
+						   	,	const FRIDataSendToKRC		&SentFRIData		)
 {
 	unsigned int			i		=	0;
 
-	this->LoggingMemory[ 0][this->OutputCounter % this->MaximumNumberOfEntries]	=	ReceivedFRIData.intf.timestamp;
+	this->LoggingMemory[ 0][this->OutputCounter % this->MaximumNumberOfEntries]	=	ReceivedFRIData.InterfaceState.FRITimeStamp;
 	this->LoggingMemory[ 1][this->OutputCounter % this->MaximumNumberOfEntries]	=	GetSystemTimeInSeconds();
 
 	if (this->CurrentControlScheme == FastResearchInterface::JOINT_POSITION_CONTROL)
 	{
-		for (i = 0; i < LBR_MNJ; i++)
+		for (i = 0; i < NUMBER_OF_JOINTS; i++)
 		{
-			this->LoggingMemory[ 2 +               i][this->OutputCounter % this->MaximumNumberOfEntries] = 		ReceivedFRIData.data.msrJntTrq	[i]	;
-			this->LoggingMemory[ 2 + 1 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	SentFRIData.cmd.jntPos			[i]);
-			this->LoggingMemory[ 2 + 2 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.data.msrJntPos	[i]);
-			this->LoggingMemory[ 2 + 3 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.data.cmdJntPos	[i]);
+			this->LoggingMemory[ 2 +						i][this->OutputCounter % this->MaximumNumberOfEntries] = 		ReceivedFRIData.MeasuredData.FRIMeasuredJointTorqueVectorInNm	[i]	;
+			this->LoggingMemory[ 2 + 1 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	SentFRIData.CommandValues.FRICommandedJointPositionVectorInRad			[i]);
+			this->LoggingMemory[ 2 + 2 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRIMeasuredJointPositionVectorInRad	[i]);
+			this->LoggingMemory[ 2 + 3 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRICommandedJointPostionVectorFromKRC	[i]);
 		}
 	}
 
 	if (this->CurrentControlScheme == FastResearchInterface::CART_IMPEDANCE_CONTROL)
 	{
-		for (i = 0; i < FRI_CART_VEC; i++)
+		for (i = 0; i < NUMBER_OF_CART_DOFS; i++)
 		{
 			//! \todo Add further values for the case of FastResearchInterface::CART_IMPEDANCE_CONTROL (in particular pose values).
-			this->LoggingMemory[ 2 +                    i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.cmd.cartStiffness		[i];
-			this->LoggingMemory[ 2 + 1 * FRI_CART_VEC + i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.cmd.cartDamping		[i];
-			this->LoggingMemory[ 2 + 2 * FRI_CART_VEC + i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.cmd.addTcpFT			[i];
+			this->LoggingMemory[ 2 +					i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.CommandValues.FRICommandedCartesianStiffnessVector		[i];
+			this->LoggingMemory[ 2 + 1 * NUMBER_OF_CART_DOFS + i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.CommandValues.FRICommandedNormalizedCartesianDampingVector		[i];
+			this->LoggingMemory[ 2 + 2 * NUMBER_OF_CART_DOFS + i][this->OutputCounter % this->MaximumNumberOfEntries] = SentFRIData.CommandValues.FRICommandedAdditionalCartesianForceTorqueVector			[i];
 		}
 	}
 
 	if (this->CurrentControlScheme == FastResearchInterface::JOINT_IMPEDANCE_CONTROL)
 	{
-		for (i = 0; i < LBR_MNJ; i++)
+		for (i = 0; i < NUMBER_OF_JOINTS; i++)
 		{
-			this->LoggingMemory[ 2 +               i][this->OutputCounter % this->MaximumNumberOfEntries] = 		ReceivedFRIData.data.msrJntTrq			[i]	;
-			this->LoggingMemory[ 2 +   	 LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	SentFRIData.cmd.jntPos					[i]);
-			this->LoggingMemory[ 2 + 2 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.data.msrJntPos			[i]);
-			this->LoggingMemory[ 2 + 3 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.data.cmdJntPos			[i]);
-			this->LoggingMemory[ 2 + 4 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.cmd.jntStiffness			[i]	;
-			this->LoggingMemory[ 2 + 5 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.cmd.jntDamping				[i]	;
-			this->LoggingMemory[ 2 + 6 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.cmd.addJntTrq				[i]	;
-			this->LoggingMemory[ 2 + 7 * LBR_MNJ + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.data.cmdJntPosFriOffset	[i]);
+			this->LoggingMemory[ 2 +						i][this->OutputCounter % this->MaximumNumberOfEntries] = 		ReceivedFRIData.MeasuredData.FRIMeasuredJointTorqueVectorInNm			[i]	;
+			this->LoggingMemory[ 2 +   	 NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	SentFRIData.CommandValues.FRICommandedJointPositionVectorInRad					[i]);
+			this->LoggingMemory[ 2 + 2 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRIMeasuredJointPositionVectorInRad			[i]);
+			this->LoggingMemory[ 2 + 3 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRICommandedJointPostionVectorFromKRC			[i]);
+			this->LoggingMemory[ 2 + 4 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.CommandValues.FRICommandedJointStiffnessVectorInNmPerRad			[i]	;
+			this->LoggingMemory[ 2 + 5 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.CommandValues.FRICommandedNormalizedJointDampingVector				[i]	;
+			this->LoggingMemory[ 2 + 6 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.CommandValues.FRICommandedAdditionalJointTorqueVectorInNm				[i]	;
+			this->LoggingMemory[ 2 + 7 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRICommandedJointPostionOffsetVectorFromKRC	[i]);
+		}
+	}
+
+	if (this->CurrentControlScheme == FastResearchInterface::JOINT_TORQUE_CONTROL)
+	{
+		for (i = 0; i < NUMBER_OF_JOINTS; i++)
+		{
+			this->LoggingMemory[ 2 +						i][this->OutputCounter % this->MaximumNumberOfEntries] = 		ReceivedFRIData.MeasuredData.FRIMeasuredJointTorqueVectorInNm	[i]	;
+			this->LoggingMemory[ 2 +	 NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = DEG(	ReceivedFRIData.MeasuredData.FRIMeasuredJointPositionVectorInRad	[i]);
+			this->LoggingMemory[ 2 + 2 * NUMBER_OF_JOINTS + i][this->OutputCounter % this->MaximumNumberOfEntries] = 		SentFRIData.CommandValues.FRICommandedAdditionalJointTorqueVectorInNm		[i]	;
 		}
 	}
 
@@ -349,13 +356,16 @@ int DataLogging::WriteToFile(void)
 	switch (this->CurrentControlScheme)
 	{
 	case FastResearchInterface::JOINT_POSITION_CONTROL:
-		ElementsPerLine	=	2 + 4 * LBR_MNJ;
+		ElementsPerLine	=	2 + 4 * NUMBER_OF_JOINTS;
 		break;
 	case FastResearchInterface::CART_IMPEDANCE_CONTROL:
-		ElementsPerLine	=	2 + 3 * FRI_CART_VEC;
+		ElementsPerLine	=	2 + 3 * NUMBER_OF_CART_DOFS;
 		break;
 	case FastResearchInterface::JOINT_IMPEDANCE_CONTROL:
-		ElementsPerLine	=	2 + 8 * LBR_MNJ;
+		ElementsPerLine	=	2 + 8 * NUMBER_OF_JOINTS;
+		break;
+	case FastResearchInterface::JOINT_TORQUE_CONTROL:
+		ElementsPerLine	=	2 + 3 * NUMBER_OF_JOINTS;
 		break;
 	default:
 		return(EINVAL);

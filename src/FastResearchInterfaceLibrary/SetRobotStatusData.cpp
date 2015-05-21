@@ -9,26 +9,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -39,15 +25,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -56,7 +49,7 @@
 
 #include <FastResearchInterface.h>
 #include <pthread.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 
 
 // ****************************************************************
@@ -67,15 +60,15 @@ void FastResearchInterface::SetKRLBoolValues(const bool *KRLBoolValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
 		if (KRLBoolValues[i])
 		{
-			this->CommandData.krl.boolData |= (1 << i);
+			this->CommandData.SharedKRLVariables.FRIBoolValuesInKRC |= (1 << i);
 		}
 		else
 		{
-			this->CommandData.krl.boolData &= ( ~( 1 << i) );
+			this->CommandData.SharedKRLVariables.FRIBoolValuesInKRC &= ( ~( 1 << i) );
 		}
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
@@ -92,9 +85,9 @@ void FastResearchInterface::SetKRLIntValues(const int *KRLIntValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
-		this->CommandData.krl.intData[i]	=	KRLIntValues[i];
+		this->CommandData.SharedKRLVariables.FRIIntegerValuesInKRC[i]	=	KRLIntValues[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -110,9 +103,9 @@ void FastResearchInterface::SetKRLFloatValues(const float *KRLFloatValues)
 	unsigned int		i	=	0;
 
 	pthread_mutex_lock(&(this->MutexForControlData));
-	for (i = 0; i < FRI_USER_SIZE; i++)
+	for (i = 0; i < SIZE_USER_DATA; i++)
 	{
-		this->CommandData.krl.realData[i]	=	KRLFloatValues[i];
+		this->CommandData.SharedKRLVariables.FRIFloatingPointValuesInKRC[i]	=	KRLFloatValues[i];
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 
@@ -124,16 +117,16 @@ void FastResearchInterface::SetKRLFloatValues(const float *KRLFloatValues)
 // SetKRLBoolValue()
 //
 void FastResearchInterface::SetKRLBoolValue(	const unsigned int	&Index
-                                            ,	const bool			&Value	)
+											,	const bool			&Value	)
 {
 	pthread_mutex_lock(&(this->MutexForControlData));
 	if (Value)
 	{
-		this->CommandData.krl.boolData |= (1 << Index);
+		this->CommandData.SharedKRLVariables.FRIBoolValuesInKRC |= (1 << Index);
 	}
 	else
 	{
-		this->CommandData.krl.boolData &= ( ~( 1 << Index) );
+		this->CommandData.SharedKRLVariables.FRIBoolValuesInKRC &= ( ~( 1 << Index) );
 	}
 	pthread_mutex_unlock(&(this->MutexForControlData));
 	return;
@@ -144,10 +137,10 @@ void FastResearchInterface::SetKRLBoolValue(	const unsigned int	&Index
 // SetKRLIntValue()
 //
 void FastResearchInterface::SetKRLIntValue(		const unsigned int	&Index
-                                           	,	const int			&Value	)
+										   	,	const int			&Value	)
 {
 	pthread_mutex_lock(&(this->MutexForControlData));
-	this->CommandData.krl.intData[Index]	=	Value;
+	this->CommandData.SharedKRLVariables.FRIIntegerValuesInKRC[Index]	=	Value;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 	return;
 }
@@ -157,10 +150,10 @@ void FastResearchInterface::SetKRLIntValue(		const unsigned int	&Index
 // SetKRLFloatValue()
 //
 void FastResearchInterface::SetKRLFloatValue(	const unsigned int	&Index
-                                             ,	const float			&Value	)
+											 ,	const float			&Value	)
 {
 	pthread_mutex_lock(&(this->MutexForControlData));
-	this->CommandData.krl.realData[Index]	=	Value;
+	this->CommandData.SharedKRLVariables.FRIFloatingPointValuesInKRC[Index]	=	Value;
 	pthread_mutex_unlock(&(this->MutexForControlData));
 	return;
 }

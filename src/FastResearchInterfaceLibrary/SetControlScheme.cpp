@@ -8,26 +8,12 @@
 //! The class FastResearchInterface provides a basic low-level interface
 //! to the KUKA Light-Weight Robot IV For details, please refer to the file
 //! FastResearchInterface.h.
-//! \n
-//! \n
-//! <b>GNU Lesser Public License</b>
-//! \n
-//! This file is part of the Fast Research Interface Library.
-//! \n\n
-//! The Fast Research Interface Library is free software: you can redistribute
-//! it and/or modify it under the terms of the GNU General Public License
-//! as published by the Free Software Foundation, either version 3 of the
-//! License, or (at your option) any later version.
-//! \n\n
-//! The Fast Research Interface Library is distributed in the hope that it
-//! will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-//! warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-//! the GNU General Public License for more details.
-//! \n\n
-//! You should have received a copy of the GNU General Public License
-//! along with the Fast Research Interface Library. If not, see 
-//! http://www.gnu.org/licenses.
-//! \n
+//!
+//! \date December 2014
+//!
+//! \version 1.2
+//!
+//!	\author Torsten Kroeger, tkr@stanford.edu\n
 //! \n
 //! Stanford University\n
 //! Department of Computer Science\n
@@ -38,15 +24,22 @@
 //! USA\n
 //! \n
 //! http://cs.stanford.edu/groups/manips\n
-//!
-//! \date November 2011
-//!
-//! \version 1.0
-//!
-//!	\author Torsten Kroeger, tkr@stanford.edu
-//!
-//!
-//!
+//! \n
+//! \n
+//! \copyright Copyright 2014 Stanford University\n
+//! \n
+//! Licensed under the Apache License, Version 2.0 (the "License");\n
+//! you may not use this file except in compliance with the License.\n
+//! You may obtain a copy of the License at\n
+//! \n
+//! http://www.apache.org/licenses/LICENSE-2.0\n
+//! \n
+//! Unless required by applicable law or agreed to in writing, software\n
+//! distributed under the License is distributed on an "AS IS" BASIS,\n
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+//! See the License for the specific language governing permissions and\n
+//! limitations under the License.\n
+//! 
 //  ----------------------------------------------------------
 //   For a convenient reading of this file's source code,
 //   please use a tab width of four characters.
@@ -57,7 +50,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include <string.h>
-#include <friComm.h>
+#include <FRICommunication.h>
 #include <OSAbstraction.h>
 
 
@@ -70,9 +63,9 @@ int FastResearchInterface::SetControlScheme(const unsigned int &ControlScheme)
 
 	int					ResultValue		=	0;
 
-	float				FloatValues[2 * FRI_CART_FRM_DIM];
+	float				FloatValues[2 * NUMBER_OF_FRAME_ELEMENTS];
 
-	memset(FloatValues, 0x0, 2 * LBR_MNJ * sizeof(float));
+	memset(FloatValues, 0x0, 2 * NUMBER_OF_JOINTS * sizeof(float));
 
 	if (this->GetFRIMode() == FRI_STATE_MON)
 	{
@@ -80,8 +73,8 @@ int FastResearchInterface::SetControlScheme(const unsigned int &ControlScheme)
 		{
 		case FastResearchInterface::JOINT_POSITION_CONTROL:
 			pthread_mutex_lock(&(this->MutexForControlData));
-			this->CommandData.cmd.cmdFlags	=	0;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_JNTPOS;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	=	0;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_JNTPOS;
 			pthread_mutex_unlock(&(this->MutexForControlData));
 
 			// let the KRL program start the joint position controller
@@ -89,23 +82,24 @@ int FastResearchInterface::SetControlScheme(const unsigned int &ControlScheme)
 			break;
 		case FastResearchInterface::CART_IMPEDANCE_CONTROL:
 			pthread_mutex_lock(&(this->MutexForControlData));
-			this->CommandData.cmd.cmdFlags	=	0;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_CARTPOS;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_TCPFT;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_CARTSTIFF;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_CARTDAMP;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	=	0;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_CARTPOS;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_TCPFT;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_CARTSTIFF;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_CARTDAMP;
 			pthread_mutex_unlock(&(this->MutexForControlData));
 
 			// let the KRL program start the Cartesian impedance controller
 			this->SetKRLIntValue(14, 20);
 			break;
+		case FastResearchInterface::JOINT_TORQUE_CONTROL:
 		case FastResearchInterface::JOINT_IMPEDANCE_CONTROL:
 			pthread_mutex_lock(&(this->MutexForControlData));
-			this->CommandData.cmd.cmdFlags	=	0;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_JNTPOS;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_JNTTRQ;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_JNTSTIFF;
-			this->CommandData.cmd.cmdFlags	|=	FRI_CMD_JNTDAMP;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	=	0;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_JNTPOS;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_JNTTRQ;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_JNTSTIFF;
+			this->CommandData.CommandValues.FRIRobotCommandDataFlags	|=	MASK_CMD_JNTDAMP;
 			pthread_mutex_unlock(&(this->MutexForControlData));
 
 			// let the KRL program start the joint impedance controller
@@ -119,25 +113,25 @@ int FastResearchInterface::SetControlScheme(const unsigned int &ControlScheme)
 		{
 			this->SetKRLIntValue(13, 0);
 			this->SetCommandedCartForcesAndTorques(FloatValues);
-			for (i = 0; i < FRI_CART_FRM_DIM; i++)
+			for (i = 0; i < NUMBER_OF_FRAME_ELEMENTS; i++)
 			{
 				FloatValues[i]	=	(float)0.7;
 			}
 			this->SetCommandedCartDamping(FloatValues);
-			for (i = 0; i < FRI_CART_FRM_DIM; i++)
+			for (i = 0; i < NUMBER_OF_FRAME_ELEMENTS; i++)
 			{
 				FloatValues[i]	=	(i < 3)?(1000.0):(100.0);
 			}
 			this->SetCommandedCartStiffness(FloatValues);
 
 			this->GetCommandedCartPose(&(FloatValues[0]));
-			this->GetCommandedCartPoseOffsets(&(FloatValues[FRI_CART_FRM_DIM]));
+			this->GetCommandedCartPoseOffsets(&(FloatValues[NUMBER_OF_FRAME_ELEMENTS]));
 
 			// Regarding the documentation, we should do this
 			/* -------------------------------------------------------------
-			for (i = 0; i < FRI_CART_FRM_DIM; i++)
+			for (i = 0; i < NUMBER_OF_FRAME_ELEMENTS; i++)
 			{
-				FloatValues[i]	+=	FloatValues[i + FRI_CART_FRM_DIM];
+				FloatValues[i]	+=	FloatValues[i + NUMBER_OF_FRAME_ELEMENTS];
 			}
 			//------------------------------------------------------------- */
 
@@ -146,15 +140,26 @@ int FastResearchInterface::SetControlScheme(const unsigned int &ControlScheme)
 		else
 		{
 			this->SetCommandedJointTorques(FloatValues);
-			this->SetKRLIntValue(13, 0);
+			if (ControlScheme == FastResearchInterface::JOINT_TORQUE_CONTROL)
+			{
+				// setting this value to one turns off the dynamic model
+				// after friStart() has been called
+				this->SetKRLIntValue(13, 1);
+				this->SetCommandedJointDamping(FloatValues);
+				this->SetCommandedJointStiffness(FloatValues);
+			}
+			else
+			{
+				this->SetKRLIntValue(13, 0);
+			}
 			this->GetMeasuredJointPositions(&(FloatValues[0]));
-			this->GetCommandedJointPositionOffsets(&(FloatValues[LBR_MNJ]));
+			this->GetCommandedJointPositionOffsets(&(FloatValues[NUMBER_OF_JOINTS]));
 
 			// Regarding the documentation, we should do this
 			/* -------------------------------------------------------------
-			for (i = 0; i < LBR_MNJ; i++)
+			for (i = 0; i < NUMBER_OF_JOINTS; i++)
 			{
-				FloatValues[i] +=	FloatValues[i + LBR_MNJ];
+				FloatValues[i] +=	FloatValues[i + NUMBER_OF_JOINTS];
 			}
 			------------------------------------------------------------- */
 
