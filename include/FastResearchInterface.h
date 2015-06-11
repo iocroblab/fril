@@ -1718,6 +1718,15 @@ protected:
 //  ----------------------------------------------------------
 	char					*LoggingFileName;
 
+//  ---------------------- Doxygen info ----------------------
+//! \var char *Interface
+//!
+//! \brief
+//! A pointer to an array of \c char values containing the network interface name
+//!
+//! \sa sec_InitFile
+//  ----------------------------------------------------------
+	char					*Interface;
 
 //  ---------------------- Doxygen info ----------------------
 //! \var char *RobotStateString

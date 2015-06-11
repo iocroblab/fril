@@ -130,6 +130,15 @@ int FastResearchInterface::ReadInitFile(const char *InitFileName)
 					ParameterCount++;
 				}
 			}
+			
+			if ( !stricmp (InitFileParser.GetSection(), "Network") )
+         {
+            if ( !stricmp (InitFileParser.GetName(), "Interface") )
+            {
+               strcpy(this->Interface, InitFileParser.GetValue() );
+               ParameterCount++;
+            }
+         }
 		}
 	}
 	else

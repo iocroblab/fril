@@ -62,6 +62,7 @@
 #define MAX_ROBOT_NAME_LENGTH				256
 #define MAX_OUTPUT_PATH_LENGTH				256
 #define MAX_FILE_NAME_LENGTH				256
+#define MAX_INTERFACE_NAME_LENGTH			256
 #define SIZE_OF_ROBOT_STATE_STRING			4096
 
 
@@ -84,6 +85,7 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	this->LoggingPath			=	new char[MAX_OUTPUT_PATH_LENGTH];
 	this->LoggingFileName		=	new char[MAX_FILE_NAME_LENGTH];
 	this->RobotStateString		=	new char[SIZE_OF_ROBOT_STATE_STRING];
+	this->Interface			=	new char[MAX_INTERFACE_NAME_LENGTH];
 
 	memset((void*)(this->RobotName)				, 0x0	, MAX_ROBOT_NAME_LENGTH			* sizeof(char));
 	memset((void*)(this->LoggingPath)			, 0x0	, MAX_OUTPUT_PATH_LENGTH		* sizeof(char));

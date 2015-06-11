@@ -18,3 +18,7 @@ CycleTime=0.002
 NumberOfLoggingFileEntries=60000
 LoggingPath=/home/lwrcontrol/output
 LoggingFileName=LWR-Scope.dat
+
+[Network]
+#Put your network interface here
+Interface=rteth1
