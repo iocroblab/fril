@@ -57,6 +57,7 @@
 #define strnicmp strncasecmp
 #endif
 
+#define MAX_INTERFACE_NAME_LENGTH                       256
 
 // ****************************************************************
 // ReadInitFile()
@@ -135,8 +136,8 @@ int FastResearchInterface::ReadInitFile(const char *InitFileName)
          {
             if ( !stricmp (InitFileParser.GetName(), "Interface") )
             {
+               this->Interface         =       new char[MAX_INTERFACE_NAME_LENGTH];
                strcpy(this->Interface, InitFileParser.GetValue() );
-               ParameterCount++;
             }
          }
 		}

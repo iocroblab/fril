@@ -72,14 +72,20 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 								,	ResultValue						=	0;
 
 	float							ZeroVector[NUMBER_OF_JOINTS];
+	FastResearchInterface			*ThisObject						=	(FastResearchInterface*)ObjectPointer;
+	UDPSocket				*KRC;
 
-	UDPSocket 						KRC;
-
+	if(ThisObject->Interface == NULL){
+	        KRC = new UDPSocket;
+        }
+        else{
+                KRC = new UDPSocket(ThisObject->Interface);
+        }
+        
 	FRIDataReceivedFromKRC 			LocalReadData;
 
 	FRIDataSendToKRC				LocalCommandData;
 
-	FastResearchInterface			*ThisObject						=	(FastResearchInterface*)ObjectPointer;
 
 	memset(ZeroVector, 0x0, NUMBER_OF_JOINTS * sizeof(float));
 	
@@ -97,7 +103,7 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 	for(;;)
 	{
 		// receive data from the KRC unit
-		ResultValue	=	KRC.ReceiveFRIDataFromKRC(&LocalReadData);
+		ResultValue	=	KRC->ReceiveFRIDataFromKRC(&LocalReadData);
 
 		if (ResultValue != 0)
 		{
@@ -134,7 +140,7 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 		pthread_cond_broadcast(&(ThisObject->CondVarForDataReceptionFromKRC));
 
 		// send data to KRC unit
-		ResultValue						=	KRC.SendFRIDataToKRC(&LocalCommandData);
+		ResultValue						=	KRC->SendFRIDataToKRC(&LocalCommandData);
 
 		if (ResultValue != 0)
 		{
@@ -156,7 +162,7 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 	}
 
 	pthread_exit(NULL);
-	
+	delete KRC;
 	return (NULL);
 }
 

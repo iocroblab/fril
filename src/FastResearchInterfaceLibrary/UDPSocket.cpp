@@ -44,6 +44,7 @@
 //   please use a tab width of four characters.
 //  ----------------------------------------------------------
 
+#define MAX_INTERFACE_NAME_LENGTH                       256
 
 #include "UDPSocket.h"
  #include <OSAbstraction.h>
@@ -84,6 +85,32 @@ UDPSocket::UDPSocket(void)
 	this->Init();
 }
 
+// ****************************************************************
+// Constructor with parameter
+//
+UDPSocket::UDPSocket(char *Interface)
+{
+	this->ServerPortNumber	=	SERVER_PORT;
+
+	this->ServerInterface 	= 	new char[sizeof(Interface)];
+	strcpy(this->ServerInterface, Interface);
+	
+	// --------------------------------------------
+	//! \todo Remove this.
+	if (!ALL_DATA_SIZES_SENT_TO_KRC_ARE_OK)
+	{
+		printf("data structure size error!\n");
+		exit(1);
+	}
+	// --------------------------------------------
+
+#if defined(WIN32) || defined(WIN64) || defined(_WIN64)
+	StartWindowsSocket();
+#endif
+	this->Init();
+}
+
+
 
 // ****************************************************************
 // Destructor
@@ -123,6 +150,15 @@ void UDPSocket::Init(void)
 		fprintf(stderr, "ERROR: Cannot open socket.\n");
 		fflush(stderr);
 		exit(EXIT_FAILURE);
+	}
+	if(this->ServerInterface != NULL)
+	{
+		if (setsockopt(UDPSocketNumber, SOL_SOCKET, SO_BINDTODEVICE, &this->ServerInterface, sizeof(this->ServerInterface))< 0)
+		{
+			fprintf(stderr, "Warning: Cannot set socket options. Using default values\n");
+			fflush(stderr);
+		        //exit(EXIT_FAILURE);
+		}
 	}
 
 	KRCAddress.sin_family		=	AF_INET;
