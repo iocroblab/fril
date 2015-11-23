@@ -17,18 +17,25 @@
 #  limitations under the License.\n
 #########################################################################
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.8)
 
 project(FRIL)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 # FRIL version. Defined here but not exported to header files, because it's already defined there 
 set( FRIL_VERSION 1.2 )
 string( REGEX MATCHALL "[0-9]+" FRIL_VERSIONS ${FRIL_VERSION} )
 LIST( GET FRIL_VERSIONS 0 FRIL_VERSION_MAJOR)
 LIST( GET FRIL_VERSIONS 1 FRIL_VERSION_MINOR)
+
+set(FRIL_DIRNAME_lib ${CMAKE_INSTALL_LIBDIR})
+set(FRIL_DIRNAME_include "${CMAKE_INSTALL_PREFIX}/include/fril")
+
+
 # Some example programs use "libpthread"
 # http://stackoverflow.com/questions/1620918/cmake-and-libpthread
-
 find_package(Threads REQUIRED)
 # TODO, the Windows version should use the pthread library provided.
 
@@ -46,14 +53,11 @@ set(FRIL_HDRS  include/Console.h
                include/FastResearchInterfaceTest.h
                include/FRICommunication.h
                include/InitializationFileEntry.h
-               include/LinuxAbstraction.h
                include/LWRBaseControllerInterface.h
                include/LWRCartImpedanceController.h
                include/LWRJointImpedanceController.h
                include/LWRJointPositionController.h
-               include/MACOSAbstraction.h
                include/OSAbstraction.h
-               include/QNXAbstraction.h
                include/TypeIRMLDecision.h
                include/TypeIRML.h
                include/TypeIRMLInputParameters.h
@@ -62,8 +66,7 @@ set(FRIL_HDRS  include/Console.h
                include/TypeIRMLPolynomial.h
                include/TypeIRMLProfiles.h
                include/TypeIRMLVector.h
-               include/UDPSocket.h
-               include/WindowsAbstraction.h)
+               include/UDPSocket.h)
 
 # FRIL source files (without examples)
 set(FRIL_SRC
@@ -109,6 +112,7 @@ if(WIN32)
    set(FRIL_TEST_SRC ${FRIL_SRC}
       src/WindowsAbstraction/WindowsAbstraction.cpp)
    message (STATUS "Detected a Windows Platform")
+   set(FRIL_HDRS ${FRIL_HDRS} include/WindowsAbstraction.h)
 endif()
 
 # Check if it's an Apple OS
@@ -119,12 +123,14 @@ IF (APPLE)
       set(FRIL_TEST_SRC ${FRIL_SRC}
             src/MACOSAbstraction/MACOSAbstraction.cpp)
       message (STATUS "Detected a MacOS Platform")
+      set(FRIL_HDRS ${FRIL_HDRS} include/MACOSAbstraction.h)
    ENDIF (NOT OS_OSX)
 ENDIF (APPLE)
 # QNX
 IF (QNXNTO)
    set(FRIL_TEST_SRC ${FRIL_SRC}
            src/QNXAbstraction/QNXAbstraction.cpp)
+   set(FRIL_HDRS ${FRIL_HDRS} include/QNXAbstraction.h)
    message (STATUS "Detected a QNX Platform")
 ENDIF (QNXNTO)
 
@@ -134,6 +140,7 @@ if(OS_LINUX)
    add_definitions(-D__LINUX__ -DHAVE_SOCKLEN_T)
    set(FRIL_SRC ${FRIL_SRC}
       src/LinuxAbstraction/LinuxAbstraction.cpp)
+   set(FRIL_HDRS ${FRIL_HDRS} include/LinuxAbstraction.h)
    message (STATUS "Detected a Linux Platform")
 endif(OS_LINUX)
 
@@ -199,14 +206,44 @@ set_target_properties( fril_dynamic PROPERTIES
     
     add_executable(LWRLoggingExample src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
     target_link_libraries(LWRLoggingExample fril_test_dynamic fril_dynamic fril_irml_dynamic)    
+   
+    install(TARGETS fastResearchInterfaceTest LWRCartImpedanceControlExample
+		    LWRJointImpedanceControlExample LWRJointPositionControlExample
+		    LWRLoggingExample
+   	    RUNTIME DESTINATION bin)
   endif(ENABLE_TESTS)
 
- ########################
-  # Install
-  ########################
+########################
+# Install
+########################
+
+# Headers install
+install(FILES ${FRIL_HDRS} DESTINATION include/fril)
+
+install(TARGETS fril_dynamic fril_static EXPORT FRILExports
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include/fril)
 
 
-    # Headers install
-    install(FILES ${FRIL_HDRS}  DESTINATION include/fril)
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/frilConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake"
+  INSTALL_DESTINATION  ${FRIL_DIRNAME_lib}/cmake/fril
+  PATH_VARS 
+   FRIL_DIRNAME_lib
+   FRIL_DIRNAME_include)
 
-# 
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake"
+  VERSION ${FRIL_VERSION}
+  COMPATIBILITY AnyNewerVersion)
+
+install( EXPORT FRILExports
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
+   
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake
+       ${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake
+       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
+ 
