@@ -39,11 +39,71 @@ set(FRIL_DIRNAME_include "${CMAKE_INSTALL_PREFIX}/include/fril")
 find_package(Threads REQUIRED)
 # TODO, the Windows version should use the pthread library provided.
 
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+option(ENABLE_RTNET "Enable RTnet over Xenomai." ON)
+
+if(ENABLE_RTNET)
+  #common commands for building c++ executables and libraries
+  find_path(RTNET_INCLUDE_DIR NAMES rtnet.h PATH_SUFFIXES rtnet/include)
+  if(NOT RTNET_INCLUDE_DIR)
+    set(ENABLE_RTNET OFF)
+  endif()
+
+  if(RTNET_INCLUDE_DIR)
+   message("Found RTNET: ${RTNET_INCLUDE_DIR}")
+   # try Xenomai
+   # find Xenomai (version 2.x) it should be upgrade to 3.x
+   include(FindPkgConfig)
+
+   #dependencies native
+   pkg_check_modules(XENO_NATIVE REQUIRED libxenomai_native)
+   message("Found xenomai native includes : ${XENO_NATIVE_INCLUDE_DIRS}" )
+   message("--> with CFLAGS : ${XENO_NATIVE_CFLAGS}" )
+   message("Found xenomai native libs : ${XENO_NATIVE_LIBRARIES}" )
+   message("--> with LDFLAGS : ${XENO_NATIVE_LDFLAGS}" )
+
+   # posix
+   pkg_check_modules(XENO_POSIX REQUIRED libxenomai_posix)
+   message("Found xenomai posix includes : ${XENO_POSIX_INCLUDE_DIRS}" )
+   message("--> with CFLAGS : ${XENO_POSIX_CFLAGS}" )
+   message("Found xenomai posix libs : ${XENO_POSIX_LIBRARIES}" )
+   message("--> with LDFLAGS : ${XENO_POSIX_LDFLAGS}" )
+
+   # RTDM
+   pkg_check_modules(XENO_RTDM REQUIRED libxenomai_rtdm)
+   message("Found xenomai rtdm includes : ${XENO_RTDM_INCLUDE_DIRS}" )
+   message("--> with CFLAGS : ${XENO_RTDM_CFLAGS}" )
+   message("Found xenomai rtdm libs : ${XENO_RTDM_LIBRARIES}" )
+   message("--> with LDFLAGS : ${XENO_RTDM_LDFLAGS}" )
+
+   # setting some flags for the lib
+   # ########################################################
+   # Arranging some list ...
+   string (REPLACE ";" " " FRIL_CFLAGS_RTNET "${XENO_RTDM_CFLAGS}")
+   set(FRIL_CFLAGS_RTNET "-DRTNET ${FRIL_CFLAGS_RTNET}")
+
+   string (REPLACE ";" " " CMAKE_LINKER_FLAGS_RTNET "${XENO_RTDM_LDFLAGS}")
+   set(CMAKE_LINKER_FLAGS_RTNET "-lnative ${CMAKE_LINKER_FLAGS_RTNET}" ${XENO_POSIX_LDFLAGS})    
+        
+   message(STATUS "Compiler RTNET Flags for the library: " ${FRIL_CFLAGS_RTNET})
+   message(STATUS "Linker RTNET flags for the library: " ${CMAKE_LINKER_FLAGS_RTNET})
+
+   # setting some flags for the examples
+   # ########################################################
+   set(FRIL_CFLAGS_POSIX "-DRTNET ${XENO_POSIX_CFLAGS}")
+   set(CMAKE_EXE_LINKER_FLAGS_RTNET "-lnative ${XENO_POSIX_LDFLAGS}")
+    
+   message(STATUS "Compiler RTNET POSIX flags for the examples: " ${FRIL_CFLAGS_POSIX})
+   message(STATUS "Linker RTNET POSIX flags for the examples: " ${CMAKE_EXE_LINKER_FLAGS_RTNET})
+  endif()
+endif()  
+
+
 ########################
 # Defining the sources
 ########################
-
-include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # FRIL header files
 set(FRIL_HDRS  include/Console.h
@@ -167,8 +227,8 @@ add_library(fril_dynamic SHARED ${FRIL_SRC})
 target_link_libraries(fril_dynamic ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties( fril_dynamic PROPERTIES
   DEFINE_SYMBOL "FRIL_DLL_EXPORT"
-  SOVERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
-  VERSION "${FRIL_VERSION}"
+  VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
+  SOVERSION "${FRIL_VERSION_MAJOR}"
   OUTPUT_NAME fril
 # Set accumulated compilation flags: (.so and .a)
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
@@ -247,3 +307,61 @@ install( FILES ${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake
        ${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake
        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
  
+
+# RTNET part
+###############################################################################
+if(ENABLE_RTNET)
+  add_library(fril_static_rt STATIC ${FRIL_SRC} )
+  target_link_libraries(fril_static_rt ${CMAKE_LINKER_FLAGS_RTNET})
+  set_target_properties(fril_static_rt PROPERTIES 
+  DEFINE_SYMBOL "FRIL_DLL_EXPORT"
+  OUTPUT_NAME fril_rt 
+# Set accumulated compilation flags: (.so and .a)
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
+  LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
+  VERSION "${FRIL_VERSION}"
+  CLEAN_DIRECT_OUTPUT 1)
+
+# Create dynamic library (.so) with all basic FRIL functions
+  add_library(fril_dynamic_rt SHARED ${FRIL_SRC})
+  target_link_libraries(fril_dynamic_rt ${CMAKE_LINKER_FLAGS_RTNET})
+  set_target_properties( fril_dynamic_rt PROPERTIES 
+  DEFINE_SYMBOL "FRIL_DLL_EXPORT"
+  VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
+  SOVERSION "${FRIL_VERSION_MAJOR}"
+  OUTPUT_NAME fril_rt
+# Set accumulated compilation flags: (.so and .a)
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
+  LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
+  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+  CLEAN_DIRECT_OUTPUT 1)
+
+  ########################
+  # Test and examples
+  ########################
+  OPTION(ENABLE_TESTS_RT "Compilation of test and example RT versions programs" ON)
+  if(ENABLE_TESTS_RT)
+    #add_library(fril_irml_dynamic STATIC ${FRIL_TYPEIRML_SRC})
+    #add_library(fril_test_dynamic STATIC ${FRIL_TEST_SRC})
+   
+    add_executable(fastResearchInterfaceTest_rt src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp)
+    target_link_libraries(fastResearchInterfaceTest_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)     
+
+    add_executable(LWRCartImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
+    target_link_libraries(LWRCartImpedanceControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    
+    add_executable(LWRJointImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
+    target_link_libraries(LWRJointImpedanceControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    
+    add_executable(LWRJointPositionControlExample_rt src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
+    target_link_libraries(LWRJointPositionControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    
+    add_executable(LWRLoggingExample_rt src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
+    target_link_libraries(LWRLoggingExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)    
+   
+    install(TARGETS fastResearchInterfaceTest_rt LWRCartImpedanceControlExample_rt
+		    LWRJointImpedanceControlExample_rt LWRJointPositionControlExample_rt
+		    LWRLoggingExample_rt 
+   	    RUNTIME DESTINATION bin)
+  endif(ENABLE_TESTS_RT)
+endif(ENABLE_RTNET)   
