@@ -1,0 +1,24 @@
+# - Config file for the Fril package
+# It defines the following variables
+#  FRIL_INCLUDE_DIRS - include directories for Reflexxes
+#  FRIL_LIBRARIES    - libraries to link against
+#  FRIL_LIBRARIES_STATIC - static version of the library
+#  FRIL_LIBRARIES_RT    - libraries to link against RT version
+#  FRIL_LIBRARIES_RT_STATIC - static RT version of the library
+
+
+ 
+@PACKAGE_INIT@
+
+SET_AND_CHECK(FRIL_INCLUDE_DIR @PACKAGE_FRIL_DIRNAME_include@ )
+
+IF(NOT TARGET fril)
+  INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FRILExports.cmake)
+ENDIF()
+
+SET(FRIL_INCLUDE_DIRS ${FRIL_INCLUDE_DIR} )
+SET(FRIL_LIBRARIES fril)
+SET(FRIL_LIBRARIES_STATIC fril.a)
+SET(FRIL_LIBRARIES_RT fril_rt)
+SET(FRIL_LIBRARIES_RT_STATIC fril_rt.a)
+
