@@ -30,9 +30,16 @@ string( REGEX MATCHALL "[0-9]+" FRIL_VERSIONS ${FRIL_VERSION} )
 LIST( GET FRIL_VERSIONS 0 FRIL_VERSION_MAJOR)
 LIST( GET FRIL_VERSIONS 1 FRIL_VERSION_MINOR)
 
+set( TYPEIRML_VERSION 1.2 )
+string( REGEX MATCHALL "[0-9]+" TYPEIRML_VERSIONS ${TYPEIRML_VERSION} )
+LIST( GET TYPEIRML_VERSIONS 0 TYPEIRML_VERSION_MAJOR)
+LIST( GET TYPEIRML_VERSIONS 1 TYPEIRML_VERSION_MINOR)
+
 set(FRIL_DIRNAME_lib ${CMAKE_INSTALL_LIBDIR})
 set(FRIL_DIRNAME_include "${CMAKE_INSTALL_PREFIX}/include/fril")
 
+set(TYPEIRML_DIRNAME_lib ${CMAKE_INSTALL_LIBDIR})
+set(TYPEIRML_DIRNAME_include "${CMAKE_INSTALL_PREFIX}/include/RML")
 
 # Some example programs use "libpthread"
 # http://stackoverflow.com/questions/1620918/cmake-and-libpthread
@@ -118,15 +125,16 @@ set(FRIL_HDRS  include/Console.h
                include/LWRJointImpedanceController.h
                include/LWRJointPositionController.h
                include/OSAbstraction.h
-               include/TypeIRMLDecision.h
+               include/UDPSocket.h)
+
+set(TYPEIRML_HDRS include/TypeIRMLDecision.h
                include/TypeIRML.h
                include/TypeIRMLInputParameters.h
                include/TypeIRMLMath.h
                include/TypeIRMLOutputParameters.h
                include/TypeIRMLPolynomial.h
                include/TypeIRMLProfiles.h
-               include/TypeIRMLVector.h
-               include/UDPSocket.h)
+               include/TypeIRMLVector.h)
 
 # FRIL source files (without examples)
 set(FRIL_SRC
@@ -159,7 +167,7 @@ set(FRIL_STARTED_EXAMPLES
         src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp
         src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp
         src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
-set(FRIL_TYPEIRML_SRC
+set(TYPEIRML_SRC
         src/TypeIRML/TypeIRML.cpp
         src/TypeIRML/TypeIRMLDecision.cpp
         src/TypeIRML/TypeIRMLMath.cpp
@@ -204,12 +212,16 @@ if(OS_LINUX)
    message (STATUS "Detected a Linux Platform")
 endif(OS_LINUX)
 
+set(FRIL_TARGETS fril_static 
+		 fril_dynamic)
+set(TYPEIRML_TARGETS TypeIRML_static
+		 TypeIRML_dynamic)
 
 add_library(fril_static STATIC ${FRIL_SRC} )
 target_link_libraries(fril_static ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(fril_static 
   PROPERTIES DEFINE_SYMBOL "FRIL_DLL_EXPORT"
-  OUTPUT_NAME fril
+  OUTPUT_NAME FastResearchInterfaceLibrary
 # Set accumulated compilation flags: (.so and .a)
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
   LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
@@ -219,9 +231,6 @@ set_target_properties(fril_static
     target_link_libraries(fril_static rt ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
-# Defaul install
-    install(TARGETS fril_static DESTINATION lib)
-
 # Create dynamic library (.so) with all basic FRIL functions
 add_library(fril_dynamic SHARED ${FRIL_SRC})
 target_link_libraries(fril_dynamic ${CMAKE_THREAD_LIBS_INIT})
@@ -229,43 +238,58 @@ set_target_properties( fril_dynamic PROPERTIES
   DEFINE_SYMBOL "FRIL_DLL_EXPORT"
   VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
   SOVERSION "${FRIL_VERSION_MAJOR}"
-  OUTPUT_NAME fril
+  OUTPUT_NAME FastResearchInterfaceLibrary
 # Set accumulated compilation flags: (.so and .a)
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
   LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
-  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
   CLEAN_DIRECT_OUTPUT 1)
   IF (UNIX AND NOT APPLE)
    SET_TARGET_PROPERTIES( fril_dynamic PROPERTIES
-     LINK_FLAGS "-Wl,-zdefs")
+     LINK_FLAGS "-Wl,-zdefs ${CMAKE_LD_FLAGS_ADD}")
    target_link_libraries(fril_dynamic rt ${CMAKE_THREAD_LIBS_INIT})
   endif ()
 
- # Defaul install
-    install(TARGETS fril_dynamic DESTINATION lib)
-  
+add_library(TypeIRML_static STATIC ${TYPEIRML_SRC})
+set_target_properties(TypeIRML_static PROPERTIES
+  OUTPUT_NAME TypeIRML
+# Set accumulated compilation flags: (.so and .a)
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
+  VERSION "${FRIL_VERSION}"
+  CLEAN_DIRECT_OUTPUT 1)
+
+# Create dynamic library (.so) with all basic functions
+add_library(TypeIRML_dynamic SHARED ${TYPEIRML_SRC})
+set_target_properties( TypeIRML_dynamic PROPERTIES
+  VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
+  SOVERSION "${FRIL_VERSION_MAJOR}"
+  OUTPUT_NAME TypeIRML
+# Set accumulated compilation flags: (.so and .a)
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
+  LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
+  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
+  CLEAN_DIRECT_OUTPUT 1)
+
   ########################
   # Test and examples
   ########################
   OPTION(ENABLE_TESTS "Compilation of test and example programs" ON)
   if(ENABLE_TESTS)
-    add_library(fril_irml_dynamic STATIC ${FRIL_TYPEIRML_SRC})
-    add_library(fril_test_dynamic STATIC ${FRIL_TEST_SRC})
-   
-    add_executable(fastResearchInterfaceTest src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp)
-    target_link_libraries(fastResearchInterfaceTest fril_test_dynamic fril_dynamic fril_irml_dynamic)
+  
+    add_executable(fastResearchInterfaceTest ${FRIL_TEST_SRC})
+    target_link_libraries(fastResearchInterfaceTest fril_dynamic TypeIRML_dynamic)
     
     add_executable(LWRCartImpedanceControlExample src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
-    target_link_libraries(LWRCartImpedanceControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    target_link_libraries(LWRCartImpedanceControlExample fril_dynamic TypeIRML_dynamic)
     
     add_executable(LWRJointImpedanceControlExample src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
-    target_link_libraries(LWRJointImpedanceControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    target_link_libraries(LWRJointImpedanceControlExample fril_dynamic TypeIRML_dynamic)
     
     add_executable(LWRJointPositionControlExample src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
-    target_link_libraries(LWRJointPositionControlExample fril_test_dynamic fril_dynamic fril_irml_dynamic)
+    target_link_libraries(LWRJointPositionControlExample fril_dynamic TypeIRML_dynamic )
     
     add_executable(LWRLoggingExample src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
-    target_link_libraries(LWRLoggingExample fril_test_dynamic fril_dynamic fril_irml_dynamic)    
+    target_link_libraries(LWRLoggingExample fril_dynamic TypeIRML_dynamic)    
    
     install(TARGETS fastResearchInterfaceTest LWRCartImpedanceControlExample
 		    LWRJointImpedanceControlExample LWRJointPositionControlExample
@@ -273,49 +297,17 @@ set_target_properties( fril_dynamic PROPERTIES
    	    RUNTIME DESTINATION bin)
   endif(ENABLE_TESTS)
 
-########################
-# Install
-########################
-
-# Headers install
-install(FILES ${FRIL_HDRS} DESTINATION include/fril)
-
-install(TARGETS fril_dynamic fril_static EXPORT FRILExports
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include/fril)
-
-
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/frilConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake"
-  INSTALL_DESTINATION  ${FRIL_DIRNAME_lib}/cmake/fril
-  PATH_VARS 
-   FRIL_DIRNAME_lib
-   FRIL_DIRNAME_include)
-
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake"
-  VERSION ${FRIL_VERSION}
-  COMPATIBILITY AnyNewerVersion)
-
-install( EXPORT FRILExports
-         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
-   
-install( FILES ${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake
-       ${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake
-       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
  
 
 # RTNET part
 ###############################################################################
 if(ENABLE_RTNET)
+  set (FRIL_TARGETS ${FRIL_TARGETS} fril_static_rt fril_dynamic_rt)
   add_library(fril_static_rt STATIC ${FRIL_SRC} )
   target_link_libraries(fril_static_rt ${CMAKE_LINKER_FLAGS_RTNET})
   set_target_properties(fril_static_rt PROPERTIES 
   DEFINE_SYMBOL "FRIL_DLL_EXPORT"
-  OUTPUT_NAME fril_rt 
+  OUTPUT_NAME FastResearchInterfaceLibrary_rt 
 # Set accumulated compilation flags: (.so and .a)
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
   LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
@@ -329,11 +321,11 @@ if(ENABLE_RTNET)
   DEFINE_SYMBOL "FRIL_DLL_EXPORT"
   VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
   SOVERSION "${FRIL_VERSION_MAJOR}"
-  OUTPUT_NAME fril_rt
+  OUTPUT_NAME FastResearchInterfaceLibrary_rt
 # Set accumulated compilation flags: (.so and .a)
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
   LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
-  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
   CLEAN_DIRECT_OUTPUT 1)
 
   ########################
@@ -341,23 +333,20 @@ if(ENABLE_RTNET)
   ########################
   OPTION(ENABLE_TESTS_RT "Compilation of test and example RT versions programs" ON)
   if(ENABLE_TESTS_RT)
-    #add_library(fril_irml_dynamic STATIC ${FRIL_TYPEIRML_SRC})
-    #add_library(fril_test_dynamic STATIC ${FRIL_TEST_SRC})
-   
-    add_executable(fastResearchInterfaceTest_rt src/FastResearchInterfaceTest/FastResearchInterfaceTest.cpp)
-    target_link_libraries(fastResearchInterfaceTest_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)     
+    add_executable(fastResearchInterfaceTest_rt ${FRIL_TEST_SRC})
+    target_link_libraries(fastResearchInterfaceTest_rt fril_dynamic_rt TypeIRML_dynamic)     
 
     add_executable(LWRCartImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
-    target_link_libraries(LWRCartImpedanceControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    target_link_libraries(LWRCartImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
     
     add_executable(LWRJointImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
-    target_link_libraries(LWRJointImpedanceControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    target_link_libraries(LWRJointImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
     
     add_executable(LWRJointPositionControlExample_rt src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
-    target_link_libraries(LWRJointPositionControlExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)
+    target_link_libraries(LWRJointPositionControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
     
     add_executable(LWRLoggingExample_rt src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
-    target_link_libraries(LWRLoggingExample_rt fril_test_dynamic fril_dynamic_rt fril_irml_dynamic)    
+    target_link_libraries(LWRLoggingExample_rt fril_dynamic_rt TypeIRML_dynamic)    
    
     install(TARGETS fastResearchInterfaceTest_rt LWRCartImpedanceControlExample_rt
 		    LWRJointImpedanceControlExample_rt LWRJointPositionControlExample_rt
@@ -365,3 +354,65 @@ if(ENABLE_RTNET)
    	    RUNTIME DESTINATION bin)
   endif(ENABLE_TESTS_RT)
 endif(ENABLE_RTNET)   
+
+
+########################
+# Install libs
+########################
+
+# Headers install
+install(FILES ${FRIL_HDRS} DESTINATION include/fril)
+install(FILES ${TYPEIRML_HDRS} DESTINATION include/RML)
+
+install(TARGETS ${FRIL_TARGETS} EXPORT FRILExports
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include/fril)
+
+install(TARGETS ${TYPEIRML_TARGETS} EXPORT TYPEIRMLExports
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include/RML)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/frilConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake"
+  INSTALL_DESTINATION  ${FRIL_DIRNAME_lib}/cmake/fril
+  PATH_VARS 
+   FRIL_DIRNAME_lib
+   FRIL_DIRNAME_include)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/TypeIRMLConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/TypeIRMLConfig.cmake"
+  INSTALL_DESTINATION  ${TYPEIRML_DIRNAME_lib}/cmake/TypeIRML
+  PATH_VARS 
+   TYPEIRML_DIRNAME_lib
+   TYPEIRML_DIRNAME_include)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake"
+  VERSION ${FRIL_VERSION}
+  COMPATIBILITY AnyNewerVersion)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/TypeIRMLConfigVersion.cmake"
+  VERSION ${TYPEIRML_VERSION}
+  COMPATIBILITY AnyNewerVersion)
+
+install( EXPORT FRILExports
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
+
+install( EXPORT TYPEIRMLExports
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TypeIRML)
+   
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake
+       ${CMAKE_CURRENT_BINARY_DIR}/frilConfigVersion.cmake
+       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
+   
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/TypeIRMLConfig.cmake
+       ${CMAKE_CURRENT_BINARY_DIR}/TypeIRMLConfigVersion.cmake
+       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TypeIRML)
+
