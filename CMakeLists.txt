@@ -177,6 +177,7 @@ set(TYPEIRML_SRC
 
 #### Adding some files depending on OS
 if(WIN32)
+   set(FRIL_DEFS ${FRIL_DEFS} -DWIN32)
    set(FRIL_TEST_SRC ${FRIL_SRC}
       src/WindowsAbstraction/WindowsAbstraction.cpp)
    message (STATUS "Detected a Windows Platform")
@@ -186,6 +187,7 @@ endif()
 # Check if it's an Apple OS
 IF (APPLE)
 # Check if it's OS X or another MacOS (that's got to be pretty unlikely)
+   set(FRIL_DEFS ${FRIL_DEFS} -D__MACOS__)
    STRING (REGEX MATCH "Darwin" OS_OSX ${CMAKE_SYSTEM_NAME})
    IF (NOT OS_OSX)
       set(FRIL_TEST_SRC ${FRIL_SRC}
@@ -196,7 +198,8 @@ IF (APPLE)
 ENDIF (APPLE)
 # QNX
 IF (QNXNTO)
-   set(FRIL_TEST_SRC ${FRIL_SRC}
+   set(FRIL_DEFS ${FRIL_DEFS} -D_NTO_)
+   set(FRIL_SRC ${FRIL_SRC}
            src/QNXAbstraction/QNXAbstraction.cpp)
    set(FRIL_HDRS ${FRIL_HDRS} include/QNXAbstraction.h)
    message (STATUS "Detected a QNX Platform")
@@ -205,13 +208,14 @@ ENDIF (QNXNTO)
 # CMake does not distinguish Linux from other Unices.
 STRING (REGEX MATCH "Linux" OS_LINUX ${CMAKE_SYSTEM_NAME})
 if(OS_LINUX)
-   add_definitions(-D__LINUX__ -DHAVE_SOCKLEN_T)
+   set(FRIL_DEFS ${FRIL_DEFS} -D__LINUX__)
    set(FRIL_SRC ${FRIL_SRC}
       src/LinuxAbstraction/LinuxAbstraction.cpp)
    set(FRIL_HDRS ${FRIL_HDRS} include/LinuxAbstraction.h)
    message (STATUS "Detected a Linux Platform")
 endif(OS_LINUX)
 
+add_definitions(${FRIL_DEFS})
 set(FRIL_TARGETS fril_static 
 		 fril_dynamic)
 set(TYPEIRML_TARGETS TypeIRML_static
@@ -370,7 +374,7 @@ install(TARGETS ${FRIL_TARGETS} EXPORT FRILExports
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include/fril)
 
-install(TARGETS ${TYPEIRML_TARGETS} EXPORT TYPEIRMLExports
+install(TARGETS ${TYPEIRML_TARGETS} EXPORT TypeIRMLExports
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION bin
@@ -405,7 +409,7 @@ write_basic_package_version_file(
 install( EXPORT FRILExports
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fril)
 
-install( EXPORT TYPEIRMLExports
+install( EXPORT TypeIRMLExports
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TypeIRML)
    
 install( FILES ${CMAKE_CURRENT_BINARY_DIR}/frilConfig.cmake
