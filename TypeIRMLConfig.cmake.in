@@ -1,0 +1,17 @@
+# - Config file for the TypeIRML package
+# It defines the following variables
+#  TypeIRML_INCLUDE_DIRS - include directories for Reflexxes Motion Library (Type I)
+#  TypeIRML_LIBRARIES - libraries to link against Reflexxes Motion Library (Type I)
+#  TypeIRML_LIBRARIES_STATIC - libraries to link static 
+ 
+@PACKAGE_INIT@
+
+SET_AND_CHECK(TYPEIRML_INCLUDE_DIR @PACKAGE_TYPEIRML_DIRNAME_include@ )
+
+IF(NOT TARGET TypeIRML)
+  INCLUDE(${CMAKE_CURRENT_LIST_DIR}/TypeIRMLExports.cmake)
+ENDIF()
+
+SET(TypeIRML_INCLUDE_DIRS ${TypeIRML_INCLUDE_DIR})
+SET(TypeIRML_LIBRARIES TypeIRML )
+SET(TypeIRML_LIBRARIES_STATIC TypeIRML.a )
