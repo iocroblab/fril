@@ -54,6 +54,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <iostream>
 
 #ifndef NUMBER_OF_JOINTS
 #define NUMBER_OF_JOINTS			7
@@ -75,6 +76,17 @@
 //
 int main(int argc, char *argv[])
 {
+	 if (argc < 2) {
+        // Tell the user how to run the program
+		std::cerr << "Usage: " << argv[0] << " config.init" << std::endl;
+	        /* "Usage messages" are a conventional way of telling the user  
+	         * how to run a program if they enter the command incorrectly.  
+	         */
+	        return 1;
+	}
+	// Print the user's name:
+	std::cout << "Using as init file " << argv[1] << "!" << std::endl;
+	                                                                                                            
 	unsigned int				CycleCounter	=	0
 							,	i				=	0;
 
@@ -91,7 +103,7 @@ int main(int argc, char *argv[])
 
 	LWRCartImpedanceController	*Robot;
 
-	Robot	=	new LWRCartImpedanceController("/home/lwrcontrol/etc/980039-FRI-Driver.init");
+	Robot	=	new LWRCartImpedanceController(argv[1]);
 
 	fprintf(stdout, "RobotCartImpedanceController object created. Starting the robot...\n");
 

@@ -56,7 +56,7 @@
 #include <OSAbstraction.h>
 #include <FastResearchInterfaceTest.h>
 
-
+#include <iostream>
 
 #ifndef PI
 #define PI	3.1415926535897932384626433832795
@@ -71,6 +71,17 @@
 
 int main(int argc, char *argv[])
 {
+       if (argc < 2) {
+       // Tell the user how to run the program
+	      std::cerr << "Usage: " << argv[0] << " config.init" << std::endl;
+               /* "Usage messages" are a conventional way of telling the user
+                * how to run a program if they enter the command incorrectly.
+                */
+               return 1;
+        }
+        // Print the user's name:
+        std::cout << "Using as init file " << argv[1] << "!" << std::endl;
+
 	bool					Run							=	true
 						,	StartRobotCalled			=	false;
 
@@ -101,23 +112,14 @@ int main(int argc, char *argv[])
 	memset(TmpFloatValues		, 0x0	, SIZE_USER_DATA				* sizeof(float)	);
 	memset(DesiredTorqueValues	, 0x0	, NUMBER_OF_JOINTS					* sizeof(float)	);
 
-#if defined(WIN32) || defined(WIN64) || defined(_WIN64)
-	FRI = new FastResearchInterface("E:\\Stanford\\Research\\SourceCode\\LWR_Public_2014\\etc\\980039-FRI-Driver.init");
-#endif
 
-#ifdef __LINUX__
-	fprintf(stdout, "You may need superuser permission to run this program.\n");
-	fflush(stdout);
-	FRI = new FastResearchInterface("/home/torsten/etc/980039-FRI-Driver.init");
-#endif
+	FRI = new FastResearchInterface(argv[1]);
 
-#ifdef __MACOS__
-	FRI = new FastResearchInterface("/Users/torsten/Documents/SourceCode/LWR_Public/LWR_Public/etc/980039-FRI-Driver.init");
-#endif
-
-#ifdef _NTO_
-	FRI = new FastResearchInterface("/home/lwrcontrol/etc/980039-FRI-Driver2ms.init");
-#endif
+//#ifdef __LINUX__
+//	fprintf(stdout, "You may need superuser permission to run this program.\n");
+//	fflush(stdout);
+//	FRI = new FastResearchInterface("/home/torsten/etc/980039-FRI-Driver.init");
+//#endif
 
 	for (i = 0; i < NUMBER_OF_JOINTS; i++)
 	{
