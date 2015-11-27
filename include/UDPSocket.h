@@ -101,12 +101,12 @@ public:
 //! Constructor
 //!
 //! \details
-//! This constructor initializes the socket setting the Interface.
+//! This constructor initializes the socket setting the ServerIP.
 //!
 //! \attention
 //! Calling of the constructor does \b not fulfill any real-time requirements.
 //  ----------------------------------------------------------
-	UDPSocket(char *Interface);
+	UDPSocket(char *ServerIP);
  
 	
 	
@@ -244,12 +244,12 @@ private:
 	int ServerPortNumber;
 
 //  ---------------------- Doxygen info ----------------------
-//! \var ServerInterface
+//! \var ServerIP
 //!
 //! \brief
-//! Contains the Interface name r
+//! Contains the ServerIP
 //  ----------------------------------------------------------	
-	char *ServerInterface;
+	char *ServerIP;
 
 	
 //  ---------------------- Doxygen info ----------------------
