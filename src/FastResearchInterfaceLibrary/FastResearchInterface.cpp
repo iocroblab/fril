@@ -56,7 +56,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <OSAbstraction.h>
-
+#include <iostream>
 
 
 #define MAX_ROBOT_NAME_LENGTH				256
@@ -94,7 +94,7 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	memset((void*)(this->RobotStateString)		, 0x0	, SIZE_OF_ROBOT_STATE_STRING	* sizeof(char));
 
 	ParameterCount	=	this->ReadInitFile(InitFileName);
-
+	
 	if (ParameterCount == -1)
 	{
 		fprintf(stderr, "FastResearchInterface::FastResearchInterface(): ERROR, an initialization file name is required! QUITTING.\n");

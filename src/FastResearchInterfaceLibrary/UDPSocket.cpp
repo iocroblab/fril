@@ -88,12 +88,12 @@ UDPSocket::UDPSocket(void)
 // ****************************************************************
 // Constructor with parameter
 //
-UDPSocket::UDPSocket(char *Interface)
+UDPSocket::UDPSocket(char *ServerIP)
 {
 	this->ServerPortNumber	=	SERVER_PORT;
 
-	this->ServerInterface 	= 	new char[sizeof(Interface)];
-	strcpy(this->ServerInterface, Interface);
+	this->ServerIP 	= 	new char[sizeof(ServerIP)];
+	strcpy(this->ServerIP, ServerIP);
 	
 	// --------------------------------------------
 	//! \todo Remove this.
@@ -151,18 +151,16 @@ void UDPSocket::Init(void)
 		fflush(stderr);
 		exit(EXIT_FAILURE);
 	}
-	if(this->ServerInterface != NULL)
+	if(this->ServerIP != NULL)
 	{
-		if (setsockopt(UDPSocketNumber, SOL_SOCKET, SO_BINDTODEVICE, &this->ServerInterface, sizeof(this->ServerInterface))< 0)
-		{
-			fprintf(stderr, "Warning: Cannot set socket options. Using default values\n");
-			fflush(stderr);
-		        //exit(EXIT_FAILURE);
-		}
+		KRCAddress.sin_addr.s_addr      =       inet_addr(this->ServerIP);
+	}
+	else
+	{
+		KRCAddress.sin_addr.s_addr      =       htonl(INADDR_ANY);
 	}
 
 	KRCAddress.sin_family		=	AF_INET;
-	KRCAddress.sin_addr.s_addr	=	htonl(INADDR_ANY);
 	KRCAddress.sin_port			=	htons(ServerPortNumber);
 
 	if (bind(UDPSocketNumber, (struct sockaddr *)&KRCAddress, sizeof(KRCAddress)) < 0)
@@ -172,6 +170,7 @@ void UDPSocket::Init(void)
 		this->Close();
 		exit(EXIT_FAILURE);
 	}
+	fprintf(stdout, "Opening a server with IP: %s.\n", this->ServerIP);
 }
 
 

@@ -51,7 +51,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
+#include <string>
 #include <errno.h>
 #include <OSAbstraction.h>
 #include <FastResearchInterfaceTest.h>
@@ -80,8 +80,9 @@ int main(int argc, char *argv[])
                return 1;
         }
         // Print the user's name:
-        std::cout << "Using as init file " << argv[1] << "!" << std::endl;
-
+        std::string initFile((const char *) argv[1]); 
+        std::cout << "Using as init file " << initFile << " !!!!!!!" << std::endl;
+        
 	bool					Run							=	true
 						,	StartRobotCalled			=	false;
 
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 	memset(DesiredTorqueValues	, 0x0	, NUMBER_OF_JOINTS					* sizeof(float)	);
 
 
-	FRI = new FastResearchInterface(argv[1]);
+	FRI = new FastResearchInterface(initFile.c_str());
 
 //#ifdef __LINUX__
 //	fprintf(stdout, "You may need superuser permission to run this program.\n");
