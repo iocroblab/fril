@@ -75,11 +75,11 @@ void* FastResearchInterface::KRCCommunicationThreadMain(void *ObjectPointer)
 	FastResearchInterface			*ThisObject						=	(FastResearchInterface*)ObjectPointer;
 	UDPSocket				*KRC;
 
-	if(ThisObject->Interface == NULL){
+	if(ThisObject->ServerIP == NULL){
 	        KRC = new UDPSocket;
         }
         else{
-                KRC = new UDPSocket(ThisObject->Interface);
+                KRC = new UDPSocket(ThisObject->ServerIP);
         }
         
 	FRIDataReceivedFromKRC 			LocalReadData;

@@ -85,7 +85,7 @@ FastResearchInterface::FastResearchInterface(const char *InitFileName)
 	this->LoggingFileName		=	new char[MAX_FILE_NAME_LENGTH];
 	this->RobotStateString		=	new char[SIZE_OF_ROBOT_STATE_STRING];
 	//this->Interface			=	new char[MAX_INTERFACE_NAME_LENGTH];
- 	this->Interface			=	NULL;
+ 	this->ServerIP			=	NULL;
  	
 
 	memset((void*)(this->RobotName)				, 0x0	, MAX_ROBOT_NAME_LENGTH			* sizeof(char));
@@ -351,7 +351,7 @@ FastResearchInterface::~FastResearchInterface(void)
 	delete[]	this->LoggingPath		;
 	delete[]	this->LoggingFileName	;
 	delete[]	this->RobotStateString	;
-	delete[]	this->Interface ;
+	delete[]	this->ServerIP ;
 	delete		this->DataLogger		;
 	delete		this->OutputConsole		;
 }

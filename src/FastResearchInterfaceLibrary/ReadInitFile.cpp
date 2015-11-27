@@ -57,7 +57,7 @@
 #define strnicmp strncasecmp
 #endif
 
-#define MAX_INTERFACE_NAME_LENGTH                       256
+#define MAX_SERVERIP_LENGTH                       256
 
 // ****************************************************************
 // ReadInitFile()
@@ -134,10 +134,10 @@ int FastResearchInterface::ReadInitFile(const char *InitFileName)
 			
 			if ( !stricmp (InitFileParser.GetSection(), "Network") )
          {
-            if ( !stricmp (InitFileParser.GetName(), "Interface") )
+            if ( !stricmp (InitFileParser.GetName(), "ServerIP") )
             {
-               this->Interface         =       new char[MAX_INTERFACE_NAME_LENGTH];
-               strcpy(this->Interface, InitFileParser.GetValue() );
+               this->ServerIP = new char[MAX_SERVERIP_LENGTH];
+               strcpy(this->ServerIP, InitFileParser.GetValue() );
             }
          }
 		}

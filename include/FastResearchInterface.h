@@ -1722,12 +1722,12 @@ protected:
 //! \var char *Interface
 //!
 //! \brief
-//! A pointer to an array of \c char values containing the network interface name
+//! A pointer to an array of \c char values containing the ServerIP adress 
 //!
 //! \sa sec_InitFile
 //  ----------------------------------------------------------
-	char					*Interface;
-
+	char					*ServerIP;
+	
 //  ---------------------- Doxygen info ----------------------
 //! \var char *RobotStateString
 //!

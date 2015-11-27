@@ -20,5 +20,6 @@ LoggingPath=/home/lwrcontrol/output
 LoggingFileName=LWR-Scope.dat
 
 [Network]
-#Put your network interface here
-Interface=rteth1
+#Put your network IP here
+#then, the interface will be choosed
+ServerIP=192.168.1.2
