@@ -143,7 +143,7 @@ void UDPSocket::Init(void)
 	memset(&KRCAddress					, 0,	sizeof(KRCAddress						));
 	memset(&this->IPAddressOfKRCUnit	, 0,	sizeof(this->IPAddressOfKRCUnit		));
 	
-	UDPSocketNumber = SOCKET(PF_INET, SOCK_DGRAM, 0);
+	UDPSocketNumber = socket(PF_INET, SOCK_DGRAM, 0);
 	
 	if (UDPSocketNumber < 0)
 	{
@@ -153,8 +153,7 @@ void UDPSocket::Init(void)
 	}
 	if(this->ServerIP != NULL)
 	{
-		//KRCAddress.sin_addr.s_addr      =       inet_addr(this->ServerIP);
-		KRCAddress.sin_addr.s_addr      =       INET_ADDR(this->ServerIP);
+		KRCAddress.sin_addr.s_addr      =       inet_addr(this->ServerIP);
 	}
 	else
 	{
@@ -164,7 +163,7 @@ void UDPSocket::Init(void)
 	KRCAddress.sin_family		=	AF_INET;
 	KRCAddress.sin_port			=	htons(ServerPortNumber);
 
-	if (BIND(UDPSocketNumber, (struct sockaddr *)&KRCAddress, sizeof(KRCAddress)) < 0)
+	if (bind(UDPSocketNumber, (struct sockaddr *)&KRCAddress, sizeof(KRCAddress)) < 0)
 	{
 		fprintf(stderr, "ERROR: Cannot bind port %d.\n", ServerPortNumber);
 		fflush(stderr);
@@ -215,7 +214,7 @@ int UDPSocket::SendFRIDataToKRC(const FRIDataSendToKRC *DataPackageToBeSentToKRC
 	if	(	(UDPSocketNumber					>=	0	)
 		&&	(ntohs(IPAddressOfKRCUnit.sin_port)	!=	0	)	)
 	{
-		NumberOfSentBytes	=	SENDTO(		UDPSocketNumber
+		NumberOfSentBytes	=	sendto(		UDPSocketNumber
 										,	(char *) DataPackageToBeSentToKRC
 										,	sizeof(FRIDataSendToKRC)
 										,	0
@@ -271,7 +270,7 @@ int UDPSocket::ReceiveUDPPackage(const int UDPSocketNumber, FRIDataReceivedFromK
 #endif
 #endif
 
-		NumberOfReceivedBytes	=	RECVFROM(		UDPSocketNumber
+		NumberOfReceivedBytes	=	recvfrom(		UDPSocketNumber
 												,	(char *)ReceivedData
 												,	sizeof(FRIDataReceivedFromKRC)
 												,	0

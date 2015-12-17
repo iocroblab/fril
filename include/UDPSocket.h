@@ -69,29 +69,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <rtnet.h>
-
-//Definitions with RTNET
-#define SOCKET rt_dev_socket
-#define SEND rt_dev_send    
-#define RECV rt_dev_recv    
-#define BIND rt_dev_bind    
-#define CLOSE rt_dev_close  
-#define SETSOCKOPT rt_dev_setsockopt
-#define IOCTL rt_dev_ioctl
-#define INET_ADDR rt_inet_aton
-#define SENDTO rt_dev_sendto
-#define RECVFROM rt_dev_recvfrom   
-#else
-#define SOCKET socket
-#define RECV recv    
-#define SEND send    
-#define BIND bind    
-#define CLOSE close  
-#define SETSOCKOPT setsockopt
-#define IOCTL ioctl
-#define INET_ADDR inet_addr
-#define SENDTO sendto
-#define RECVFROM recvfrom
 #endif// RTNET
 
 
