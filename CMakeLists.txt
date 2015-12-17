@@ -285,9 +285,9 @@ set_target_properties( TypeIRML_dynamic PROPERTIES
 ###############################################################################
 if(FRIL_RT)
    message(STATUS "Working On The Realtime Part")
-   include_directories(${Xenomai_POSIX_INCLUDE_DIRS})
+   set(FRIL_RT_INCLUDES ${Xenomai_POSIX_INCLUDE_DIRS})
    if(RTNET_INCLUDE_DIR)
-       include_directories(${RTNET_INCLUDE_DIR})
+       set(FRIL_RT_INCLUDES ${FRIL_RT_INCLUDES} ${RTNET_INCLUDE_DIR})
    endif()
    message (STATUS "Added ${RTNET_INCLUDE_DIR} and ${Xenomai_POSIX_INCLUDE_DIRS} include dirs")
    message (STATUS "Added ${Xenomai_POSIX_LIBRARIES} libraries")
@@ -298,6 +298,7 @@ if(FRIL_RT)
    set_target_properties(fril_static_rt PROPERTIES 
       DEFINE_SYMBOL "FRIL_DLL_EXPORT"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt 
+      INTERFACE_INCLUDE_DIRECTORIES "${FRIL_RT_INCLUDES}"
       COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       VERSION "${FRIL_VERSION}"
@@ -312,7 +313,7 @@ if(FRIL_RT)
       VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
       SOVERSION "${FRIL_VERSION_MAJOR}"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt
-      # Set accumulated compilation flags: (.so and .a)
+      INTERFACE_INCLUDE_DIRECTORIES "${FRIL_RT_INCLUDES}"
       COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
