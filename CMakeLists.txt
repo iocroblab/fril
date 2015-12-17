@@ -295,10 +295,10 @@ if(FRIL_RT)
    set (FRIL_TARGETS ${FRIL_TARGETS} fril_static_rt fril_dynamic_rt)
    add_library(fril_static_rt STATIC ${FRIL_SRC} )
    target_link_libraries(fril_static_rt ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
+   target_include_directories(fril_static_rt PUBLIC ${FRIL_RT_INCLUDES})
    set_target_properties(fril_static_rt PROPERTIES 
       DEFINE_SYMBOL "FRIL_DLL_EXPORT"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt 
-      INTERFACE_INCLUDE_DIRECTORIES "${FRIL_RT_INCLUDES}"
       COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       VERSION "${FRIL_VERSION}"
@@ -308,12 +308,12 @@ if(FRIL_RT)
    # Create dynamic library (.so) with all basic FRIL functions
    add_library(fril_dynamic_rt SHARED ${FRIL_SRC})
    target_link_libraries(fril_dynamic_rt ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
+   target_include_directories(fril_dynamic_rt PUBLIC ${FRIL_RT_INCLUDES})
    set_target_properties( fril_dynamic_rt PROPERTIES 
       DEFINE_SYMBOL "FRIL_DLL_EXPORT"
       VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
       SOVERSION "${FRIL_VERSION_MAJOR}"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt
-      INTERFACE_INCLUDE_DIRECTORIES "${FRIL_RT_INCLUDES}"
       COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
