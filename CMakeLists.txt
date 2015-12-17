@@ -24,6 +24,11 @@ project(FRIL)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
+
+find_package(Xenomai 2.6 COMPONENTS POSIX VXWORKS REQUIRED)
+message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
+
 # FRIL version. Defined here but not exported to header files, because it's already defined there 
 set( FRIL_VERSION 1.2 )
 string( REGEX MATCHALL "[0-9]+" FRIL_VERSIONS ${FRIL_VERSION} )
@@ -49,62 +54,22 @@ find_package(Threads REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-option(ENABLE_RTNET "Enable RTnet over Xenomai." ON)
+option(ENABLE_XENO_POSIX "Enable Xenomai POSIX version." ON)
 
-if(ENABLE_RTNET)
-  #common commands for building c++ executables and libraries
-  find_path(RTNET_INCLUDE_DIR NAMES rtnet.h PATH_SUFFIXES rtnet/include)
-  if(NOT RTNET_INCLUDE_DIR)
-    set(ENABLE_RTNET OFF)
-  endif()
+if(ENABLE_XENO_POSIX AND Xenomai_POSIX_FOUND)
+   set(FRIL_RT TRUE)
+   message("Working on the Realtime part")
+   # We want to use RTNET interface
+   # rtnet.h has some definitions
+   find_path(RTNET_INCLUDE_DIR NAMES rtnet.h PATH_SUFFIXES rtnet/include)
+   if(NOT RTNET_INCLUDE_DIR)
+      set(ENABLE_RTNET OFF)
+   endif()
 
-  if(RTNET_INCLUDE_DIR)
-   message("Found RTNET: ${RTNET_INCLUDE_DIR}")
-   # try Xenomai
-   # find Xenomai (version 2.x) it should be upgrade to 3.x
-   include(FindPkgConfig)
-
-   #dependencies native
-   pkg_check_modules(XENO_NATIVE REQUIRED libxenomai_native)
-   message("Found xenomai native includes : ${XENO_NATIVE_INCLUDE_DIRS}" )
-   message("--> with CFLAGS : ${XENO_NATIVE_CFLAGS}" )
-   message("Found xenomai native libs : ${XENO_NATIVE_LIBRARIES}" )
-   message("--> with LDFLAGS : ${XENO_NATIVE_LDFLAGS}" )
-
-   # posix
-   pkg_check_modules(XENO_POSIX REQUIRED libxenomai_posix)
-   message("Found xenomai posix includes : ${XENO_POSIX_INCLUDE_DIRS}" )
-   message("--> with CFLAGS : ${XENO_POSIX_CFLAGS}" )
-   message("Found xenomai posix libs : ${XENO_POSIX_LIBRARIES}" )
-   message("--> with LDFLAGS : ${XENO_POSIX_LDFLAGS}" )
-
-   # RTDM
-   pkg_check_modules(XENO_RTDM REQUIRED libxenomai_rtdm)
-   message("Found xenomai rtdm includes : ${XENO_RTDM_INCLUDE_DIRS}" )
-   message("--> with CFLAGS : ${XENO_RTDM_CFLAGS}" )
-   message("Found xenomai rtdm libs : ${XENO_RTDM_LIBRARIES}" )
-   message("--> with LDFLAGS : ${XENO_RTDM_LDFLAGS}" )
-
-   # setting some flags for the lib
-   # ########################################################
-   # Arranging some list ...
-   string (REPLACE ";" " " FRIL_CFLAGS_RTNET "${XENO_RTDM_CFLAGS}")
-   set(FRIL_CFLAGS_RTNET "-DRTNET ${FRIL_CFLAGS_RTNET}")
-
-   string (REPLACE ";" " " CMAKE_LINKER_FLAGS_RTNET "${XENO_RTDM_LDFLAGS}")
-   set(CMAKE_LINKER_FLAGS_RTNET "-lnative ${CMAKE_LINKER_FLAGS_RTNET}" ${XENO_POSIX_LDFLAGS})    
-        
-   message(STATUS "Compiler RTNET Flags for the library: " ${FRIL_CFLAGS_RTNET})
-   message(STATUS "Linker RTNET flags for the library: " ${CMAKE_LINKER_FLAGS_RTNET})
-
-   # setting some flags for the examples
-   # ########################################################
-   set(FRIL_CFLAGS_POSIX "-DRTNET ${XENO_POSIX_CFLAGS}")
-   set(CMAKE_EXE_LINKER_FLAGS_RTNET "-lnative ${XENO_POSIX_LDFLAGS}")
-    
-   message(STATUS "Compiler RTNET POSIX flags for the examples: " ${FRIL_CFLAGS_POSIX})
-   message(STATUS "Linker RTNET POSIX flags for the examples: " ${CMAKE_EXE_LINKER_FLAGS_RTNET})
-  endif()
+   if(RTNET_INCLUDE_DIR)
+      message("Found RTNET: ${RTNET_INCLUDE_DIR}")
+      set(FRIL_RT_DEFS -DRTNET)
+   endif()
 endif()  
 
 
@@ -125,6 +90,7 @@ set(FRIL_HDRS  include/Console.h
                include/LWRJointImpedanceController.h
                include/LWRJointPositionController.h
                include/OSAbstraction.h
+	       include/StdioAbstraction.h
                include/UDPSocket.h)
 
 set(TYPEIRML_HDRS include/TypeIRMLDecision.h
@@ -302,62 +268,91 @@ set_target_properties( TypeIRML_dynamic PROPERTIES
   endif(ENABLE_TESTS)
 
  
+      
+ 
+# include_directories(${Xenomai_POSIX_INCLUDE_DIR})
+# add_executable(demo_xeno ${XENO_EXAMPLE_SRC})
+# target_link_libraries(demo_xeno ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
+# set_target_properties(demo_xeno PROPERTIES
+#                  LINK_FLAGS ${Xenomai_POSIX_LDFLAGS})
+# target_compile_definitions(demo_xeno PUBLIC ${Xenomai_POSIX_DEFINITIONS})
 
-# RTNET part
+
 ###############################################################################
-if(ENABLE_RTNET)
-  set (FRIL_TARGETS ${FRIL_TARGETS} fril_static_rt fril_dynamic_rt)
-  add_library(fril_static_rt STATIC ${FRIL_SRC} )
-  target_link_libraries(fril_static_rt ${CMAKE_LINKER_FLAGS_RTNET})
-  set_target_properties(fril_static_rt PROPERTIES 
-  DEFINE_SYMBOL "FRIL_DLL_EXPORT"
-  OUTPUT_NAME FastResearchInterfaceLibrary_rt 
-# Set accumulated compilation flags: (.so and .a)
-  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
-  LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
-  VERSION "${FRIL_VERSION}"
-  CLEAN_DIRECT_OUTPUT 1)
 
-# Create dynamic library (.so) with all basic FRIL functions
-  add_library(fril_dynamic_rt SHARED ${FRIL_SRC})
-  target_link_libraries(fril_dynamic_rt ${CMAKE_LINKER_FLAGS_RTNET})
-  set_target_properties( fril_dynamic_rt PROPERTIES 
-  DEFINE_SYMBOL "FRIL_DLL_EXPORT"
-  VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
-  SOVERSION "${FRIL_VERSION_MAJOR}"
-  OUTPUT_NAME FastResearchInterfaceLibrary_rt
-# Set accumulated compilation flags: (.so and .a)
-  COMPILE_FLAGS "${CMAKE_CXX_FLAGS_ADD}"
-  LINK_FLAGS "${CMAKE_LD_FLAGS_ADD}"
-  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
-  CLEAN_DIRECT_OUTPUT 1)
+
+# Realtime part
+###############################################################################
+if(FRIL_RT)
+   message(STATUS "Working On The Realtime Part")
+   include_directories(${Xenomai_POSIX_INCLUDE_DIR})
+   set (FRIL_TARGETS ${FRIL_TARGETS} fril_static_rt fril_dynamic_rt)
+   add_library(fril_static_rt STATIC ${FRIL_SRC} )
+   target_link_libraries(fril_static_rt ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
+   set_target_properties(fril_static_rt PROPERTIES 
+      DEFINE_SYMBOL "FRIL_DLL_EXPORT"
+      OUTPUT_NAME FastResearchInterfaceLibrary_rt 
+      COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
+      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
+      VERSION "${FRIL_VERSION}"
+      CLEAN_DIRECT_OUTPUT 1)
+   
+
+   # Create dynamic library (.so) with all basic FRIL functions
+   add_library(fril_dynamic_rt SHARED ${FRIL_SRC})
+   target_link_libraries(fril_dynamic_rt ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
+   set_target_properties( fril_dynamic_rt PROPERTIES 
+      DEFINE_SYMBOL "FRIL_DLL_EXPORT"
+      VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
+      SOVERSION "${FRIL_VERSION_MAJOR}"
+      OUTPUT_NAME FastResearchInterfaceLibrary_rt
+      # Set accumulated compilation flags: (.so and .a)
+      COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
+      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
+      CLEAN_DIRECT_OUTPUT 1)
 
   ########################
   # Test and examples
   ########################
-  OPTION(ENABLE_TESTS_RT "Compilation of test and example RT versions programs" ON)
-  if(ENABLE_TESTS_RT)
-    add_executable(fastResearchInterfaceTest_rt ${FRIL_TEST_SRC})
-    target_link_libraries(fastResearchInterfaceTest_rt fril_dynamic_rt TypeIRML_dynamic)     
+   OPTION(ENABLE_TESTS_RT "Compilation of test and example RT versions programs" ON)
+   if(ENABLE_TESTS_RT)
+      add_executable(fastResearchInterfaceTest_rt ${FRIL_TEST_SRC})
+      target_link_libraries(fastResearchInterfaceTest_rt fril_dynamic_rt TypeIRML_dynamic)     
+      set_target_properties( fastResearchInterfaceTest_rt PROPERTIES
+                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
 
-    add_executable(LWRCartImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
-    target_link_libraries(LWRCartImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
-    
-    add_executable(LWRJointImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
-    target_link_libraries(LWRJointImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
-    
-    add_executable(LWRJointPositionControlExample_rt src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
-    target_link_libraries(LWRJointPositionControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
-    
-    add_executable(LWRLoggingExample_rt src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
-    target_link_libraries(LWRLoggingExample_rt fril_dynamic_rt TypeIRML_dynamic)    
-   
-    install(TARGETS fastResearchInterfaceTest_rt LWRCartImpedanceControlExample_rt
-		    LWRJointImpedanceControlExample_rt LWRJointPositionControlExample_rt
-		    LWRLoggingExample_rt 
-   	    RUNTIME DESTINATION bin)
-  endif(ENABLE_TESTS_RT)
-endif(ENABLE_RTNET)   
+      add_executable(LWRCartImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
+      target_link_libraries(LWRCartImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
+      set_target_properties( LWRCartImpedanceControlExample_rt PROPERTIES
+                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
+
+      add_executable(LWRJointImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
+      target_link_libraries(LWRJointImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
+      set_target_properties( LWRJointImpedanceControlExample_rt PROPERTIES
+                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
+
+      add_executable(LWRJointPositionControlExample_rt src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
+      target_link_libraries(LWRJointPositionControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
+      set_target_properties(LWRJointPositionControlExample_rt  PROPERTIES
+                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
+      
+      add_executable(LWRLoggingExample_rt src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
+      target_link_libraries(LWRLoggingExample_rt fril_dynamic_rt TypeIRML_dynamic)    
+      set_target_properties( LWRLoggingExample_rt PROPERTIES
+                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
+      
+      install(TARGETS fastResearchInterfaceTest_rt LWRCartImpedanceControlExample_rt
+            LWRJointImpedanceControlExample_rt LWRJointPositionControlExample_rt
+            LWRLoggingExample_rt 
+            RUNTIME DESTINATION bin)
+  endif()
+endif()   
 
 
 ########################
