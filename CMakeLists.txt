@@ -285,7 +285,13 @@ set_target_properties( TypeIRML_dynamic PROPERTIES
 ###############################################################################
 if(FRIL_RT)
    message(STATUS "Working On The Realtime Part")
-   include_directories(${Xenomai_POSIX_INCLUDE_DIR})
+   include_directories(${Xenomai_POSIX_INCLUDE_DIRS})
+   if(RTNET_INCLUDE_DIR)
+       include_directories(${RTNET_INCLUDE_DIR})
+   endif()
+   message (STATUS "Added ${RTNET_INCLUDE_DIR} and ${Xenomai_POSIX_INCLUDE_DIRS} include dirs")
+   message (STATUS "Added ${Xenomai_POSIX_LIBRARIES} libraries")
+
    set (FRIL_TARGETS ${FRIL_TARGETS} fril_static_rt fril_dynamic_rt)
    add_library(fril_static_rt STATIC ${FRIL_SRC} )
    target_link_libraries(fril_static_rt ${Xenomai_POSIX_LIBRARY_DIRS} ${Xenomai_POSIX_LIBRARIES})
