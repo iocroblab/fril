@@ -58,6 +58,7 @@ option(ENABLE_XENO_POSIX "Enable Xenomai POSIX version." ON)
 
 if(ENABLE_XENO_POSIX AND Xenomai_POSIX_FOUND)
    set(FRIL_RT TRUE)
+   set(FRIL_RT_DEFS ${Xenomai_POSIX_DEFINITIONS})
    message("Working on the Realtime part")
    # We want to use RTNET interface
    # rtnet.h has some definitions
@@ -68,7 +69,7 @@ if(ENABLE_XENO_POSIX AND Xenomai_POSIX_FOUND)
 
    if(RTNET_INCLUDE_DIR)
       message("Found RTNET: ${RTNET_INCLUDE_DIR}")
-      set(FRIL_RT_DEFS -DRTNET)
+      set(FRIL_RT_DEFS "-DRTNET ${FRIL_RT_DEFS}")
    endif()
 endif()  
 
@@ -90,7 +91,6 @@ set(FRIL_HDRS  include/Console.h
                include/LWRJointImpedanceController.h
                include/LWRJointPositionController.h
                include/OSAbstraction.h
-	       include/StdioAbstraction.h
                include/UDPSocket.h)
 
 set(TYPEIRML_HDRS include/TypeIRMLDecision.h
@@ -299,7 +299,7 @@ if(FRIL_RT)
    set_target_properties(fril_static_rt PROPERTIES 
       DEFINE_SYMBOL "FRIL_DLL_EXPORT"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt 
-      COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
+      COMPILE_FLAGS "${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       VERSION "${FRIL_VERSION}"
       CLEAN_DIRECT_OUTPUT 1)
@@ -314,7 +314,7 @@ if(FRIL_RT)
       VERSION "${FRIL_VERSION_MAJOR}.${FRIL_VERSION_MINOR}"
       SOVERSION "${FRIL_VERSION_MAJOR}"
       OUTPUT_NAME FastResearchInterfaceLibrary_rt
-      COMPILE_FLAGS "${Xenomai_POSIX_DEFINITIONS} ${FRIL_RT_DEFS}"
+      COMPILE_FLAGS "${FRIL_RT_DEFS}"
       LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}"
       INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
       CLEAN_DIRECT_OUTPUT 1)
@@ -327,31 +327,31 @@ if(FRIL_RT)
       add_executable(fastResearchInterfaceTest_rt ${FRIL_TEST_SRC})
       target_link_libraries(fastResearchInterfaceTest_rt fril_dynamic_rt TypeIRML_dynamic)     
       set_target_properties( fastResearchInterfaceTest_rt PROPERTIES
-                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     COMPILE_FLAGS "${FRIL_RT_DEFS}" 
                      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
 
       add_executable(LWRCartImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRCartImpedanceControlExample.cpp)
       target_link_libraries(LWRCartImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
       set_target_properties( LWRCartImpedanceControlExample_rt PROPERTIES
-                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     COMPILE_FLAGS "${FRIL_RT_DEFS}" 
                      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
 
       add_executable(LWRJointImpedanceControlExample_rt src/LWRGettingStartedExamples/LWRJointImpedanceControlExample.cpp)
       target_link_libraries(LWRJointImpedanceControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
       set_target_properties( LWRJointImpedanceControlExample_rt PROPERTIES
-                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     COMPILE_FLAGS "${FRIL_RT_DEFS}" 
                      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
 
       add_executable(LWRJointPositionControlExample_rt src/LWRGettingStartedExamples/LWRJointPositionControlExample.cpp)
       target_link_libraries(LWRJointPositionControlExample_rt fril_dynamic_rt TypeIRML_dynamic)
       set_target_properties(LWRJointPositionControlExample_rt  PROPERTIES
-                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     COMPILE_FLAGS "${FRIL_RT_DEFS}" 
                      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
       
       add_executable(LWRLoggingExample_rt src/LWRGettingStartedExamples/LWRLoggingExample.cpp)
       target_link_libraries(LWRLoggingExample_rt fril_dynamic_rt TypeIRML_dynamic)    
       set_target_properties( LWRLoggingExample_rt PROPERTIES
-                     COMPILE_FLAGS ${Xenomai_POSIX_DEFINITIONS} 
+                     COMPILE_FLAGS "${FRIL_RT_DEFS}" 
                      LINK_FLAGS "${Xenomai_POSIX_LDFLAGS}")
       
       install(TARGETS fastResearchInterfaceTest_rt LWRCartImpedanceControlExample_rt
