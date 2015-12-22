@@ -3,9 +3,15 @@
 #  FRIL_INCLUDE_DIRS - include directories for FastRearchInterfaceLibary
 #  FRIL_LIBRARIES    - libraries to link against FastRearchInterfaceLibary
 #  FRIL_LIBRARIES_STATIC - static version of the library
+#  FRIL_DEFINITIONS - definitions to use with the FRIL lib
+#  
+#  Realtime part
+#
+#  FRIL_RT_FOUND - Flag to determine if fril has realtime version
 #  FRIL_LIBRARIES_RT    - libraries to link against RT version
 #  FRIL_LIBRARIES_RT_STATIC - static RT version of the library
-#  FRIL_DEFINITIONS - definitions to use with the FRIL lib
+#  FRIL_DEFINITIONS_RT - definitions to use with the FRIL_RT lib
+#  FRIL_RT_LDFLAGS - ldflags to use when link against FRIL_RT
  
 @PACKAGE_INIT@
 
@@ -18,6 +24,12 @@ ENDIF()
 SET(FRIL_INCLUDE_DIRS ${FRIL_INCLUDE_DIR} )
 SET(FRIL_LIBRARIES fril_dynamic)
 SET(FRIL_LIBRARIES_STATIC fril_static)
-SET(FRIL_LIBRARIES_RT fril_dynamic_rt)
-SET(FRIL_LIBRARIES_RT_STATIC fril_static_rt)
-SET(FRIL_DEFINITIONS @FRIL_DEFS@)
+SET(FRIL_DEFINITIONS @FRIL_DEFS@ )
+
+# Realtime
+SET(FRIL_RT_FOUND @FRIL_RT@)
+SET(FRIL_LIBRARIES_RT fril_dynamic_rt )
+SET(FRIL_LIBRARIES_RT_STATIC fril_static_rt )
+SET(FRIL_RT_LDFLAGS @Xenomai_POSIX_LDFLAGS@ )
+SET(FRIL_DEFINITIONS_RT "@FRIL_RT_DEFS@ @FRIL_DEFS@" )
+
