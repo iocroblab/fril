@@ -12,9 +12,6 @@
 #
 # Input variables:
 # 
-# - ${Xenomai_ROOT_DIR} (optional): Used as a hint to find the Xenomai root dir
-# - $ENV{XENOMAI_ROOT_DIR} (optional): Used as a hint to find the Xenomai root dir
-#
 # Cache variables (not intended to be used in CMakeLists.txt files)
 # Input variables:
 # 
